@@ -1790,8 +1790,7 @@
         <img class="logo-preview" src="${logoSrc}" alt="" style="width:56px;height:56px;object-fit:contain;border-radius:8px;border:1px solid var(--border);display:${logoSrc?'block':'none'};" />
         <div>
           <input type="file" class="logo-file" accept="image/png,image/jpeg,image/webp" style="display:none;" />
-          <button type="button" class="btn btn-sm logo-upload-btn" style="background:rgba(255,255,255,0.1);color:#fff;">Upload Logo</button>
-          <button type="button" class="btn btn-sm btn-danger logo-remove-btn" style="display:${logoSrc?'inline-flex':'none'};">Remove</button>
+          <button type="button" class="btn btn-sm logo-action-btn" style="background:rgba(255,255,255,0.1);color:#fff;">Upload</button>
         </div>
       </div>
     `;
@@ -1868,8 +1867,7 @@
         <img class="logo-preview" src="${logoSrc}" alt="" style="width:56px;height:56px;object-fit:contain;border-radius:8px;border:1px solid var(--border);display:${logoSrc?'block':'none'};" />
         <div>
           <input type="file" class="logo-file" accept="image/png,image/jpeg,image/webp" style="display:none;" />
-          <button type="button" class="btn btn-sm logo-upload-btn" style="background:rgba(255,255,255,0.1);color:#fff;">Upload Logo</button>
-          <button type="button" class="btn btn-sm btn-danger logo-remove-btn" style="display:${logoSrc?'inline-flex':'none'};">Remove</button>
+          <button type="button" class="btn btn-sm logo-action-btn" style="background:rgba(255,255,255,0.1);color:#fff;">Upload</button>
         </div>
       </div>
     `;
@@ -2043,11 +2041,39 @@
   // ── Logo upload wiring (exp + edu) ──
   function _wireLogoUpload(card) {
     const fileInput  = card.querySelector('.logo-file');
-    const uploadBtn  = card.querySelector('.logo-upload-btn');
-    const removeBtn  = card.querySelector('.logo-remove-btn');
+    const actionBtn  = card.querySelector('.logo-action-btn');
     const preview    = card.querySelector('.logo-preview');
 
-    uploadBtn.onclick = () => fileInput.click();
+    function hasLogo() {
+      return !!(card._logoBlob || card._logoURL);
+    }
+
+    function syncLogoActionButton() {
+      if (hasLogo()) {
+        actionBtn.textContent = 'Remove';
+        actionBtn.classList.add('btn-danger');
+        actionBtn.style.background = '';
+        actionBtn.style.color = '';
+      } else {
+        actionBtn.textContent = 'Upload';
+        actionBtn.classList.remove('btn-danger');
+        actionBtn.style.background = 'rgba(255,255,255,0.1)';
+        actionBtn.style.color = '#fff';
+      }
+    }
+
+    actionBtn.onclick = () => {
+      if (!hasLogo()) {
+        fileInput.click();
+        return;
+      }
+      card._logoBlob = null;
+      card._logoURL  = null;
+      preview.src = '';
+      preview.style.display = 'none';
+      syncLogoActionButton();
+      checkDirty();
+    };
 
     fileInput.onchange = (e) => {
       const file = e.target.files[0];
@@ -2062,21 +2088,15 @@
         card._logoURL  = null; // new blob replaces any saved URL
         preview.src = dataUrl;
         preview.style.display = 'block';
-        removeBtn.style.display = 'inline-flex';
+        syncLogoActionButton();
+        checkDirty();
       });
       fileInput.value = '';
     };
 
-    removeBtn.onclick = () => {
-      card._logoBlob = null;
-      card._logoURL  = null;
-      preview.src = '';
-      preview.style.display = 'none';
-      removeBtn.style.display = 'none';
-    };
-
     // Restore existing saved URL
     if (card._logoURL === undefined) card._logoURL = preview.src || null;
+    syncLogoActionButton();
   }
 
   // ── Crop modal logic ──
