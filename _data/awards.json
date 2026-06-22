@@ -4,23 +4,9 @@
     {
       "title": "Dean's List",
       "issuer": "Georgia Institute of Technology",
-      "date": "2026-12-23",
+      "date": "2026-06-03",
       "desc": "I think GT likes me",
       "link": ""
-    },
-    {
-      "title": "Best Olympian",
-      "issuer": "Olympics",
-      "date": "",
-      "desc": "",
-      "link": "https://invalid_link"
-    },
-    {
-      "title": "Most Muscular",
-      "issuer": "",
-      "date": "",
-      "desc": "LIGHTWEIGHT BABYYY",
-      "link": "https://en.wikipedia.org/wiki/Ronnie_Coleman"
     }
   ]
 }
