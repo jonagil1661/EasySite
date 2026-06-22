@@ -1210,7 +1210,20 @@
       const cards = document.querySelectorAll('#' + id + ' .card');
       return id + ':' + cards.length + ':' + Array.from(cards).map((_,i) => i).join(',');
     }).join('|');
-    return fieldVals + '||' + active + '||' + hidden + '||' + cardOrder;
+    const logoState = ['exp-list','edu-list'].map(id => {
+      return id + ':' + Array.from(document.querySelectorAll('#' + id + ' .card')).map(card => {
+        const preview = card.querySelector('.logo-preview');
+        return [
+          card.dataset.id || '',
+          card._logoURL || '',
+          card._logoBlob ? 'new' : '',
+          (card._deletedLogoURLs || []).join(','),
+          preview?.dataset.savedPath || '',
+          preview?.style.display || '',
+        ].join(':');
+      }).join('|');
+    }).join('||');
+    return fieldVals + '||' + active + '||' + hidden + '||' + cardOrder + '||' + logoState;
   }
 
   function setCleanSnapshot() {
