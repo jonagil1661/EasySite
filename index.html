@@ -1812,6 +1812,12 @@
   </script>
   <script>
     (async function() {
+      function formatMonthYear(value) {
+        if (!/^\d{4}-\d{2}$/.test(value || '')) return value || '';
+        const [year, month] = value.split('-').map(Number);
+        return new Date(year, month - 1, 1).toLocaleString('en-US', { month: 'long', year: 'numeric' });
+      }
+
       // Apply effect setting (background follows system dark/light mode via CSS)
       try {
         const sRes = await fetch('_data/settings.json?t=' + Date.now());
@@ -1965,6 +1971,8 @@
           const list = document.getElementById('education-list');
           items.forEach(e => {
             const courses = (e.coursework || []).map(c => `<span>${c}</span>`).join('');
+            const start = formatMonthYear(e.start);
+            const end = formatMonthYear(e.end);
             list.insertAdjacentHTML('beforeend', `
               <div class="edu-card">
                 <div class="edu-header">
@@ -1972,7 +1980,7 @@
                   <div>
                     <h3 class="edu-school">${e.institution}</h3>
                     ${e.degree ? `<p class="edu-degree">${e.degree}</p>` : ''}
-                    <p class="edu-meta">${[e.location, e.gpa ? 'GPA: ' + e.gpa : '', e.end ? (e.start ? e.start + ' – ' : '') + e.end : ''].filter(Boolean).join(' · ')}</p>
+                    <p class="edu-meta">${[e.location, e.gpa ? 'GPA: ' + e.gpa : '', end ? (start ? start + ' – ' : '') + end : ''].filter(Boolean).join(' · ')}</p>
                   </div>
                 </div>
                 ${courses ? `<div class="edu-courses"><p class="edu-courses-label">Relevant Coursework</p><div class="course-grid">${courses}</div></div>` : ''}
