@@ -23,7 +23,7 @@ EasySite has three main parts:
 - `admin.html` is the private editing interface you use to manage the site.
 - `_data/*.json` stores the content that both files read and write.
 
-The admin panel asks for your GitHub username, repository name, and a Personal Access Token. Those values are stored only in your browser's `localStorage`. When you click **Save All**, the admin commits updates directly to your repository with messages like `cms: update _data/hero.json`.
+The admin panel asks for your GitHub username, repository name, branch, and a Personal Access Token. Those values are stored only in your browser's `localStorage`. When you click **Save All**, the admin commits updates directly to the selected branch with messages like `cms: update _data/hero.json`.
 
 ## Quick Start
 
@@ -92,6 +92,7 @@ Sign in with:
 
 - **GitHub Username / Owner:** your GitHub username or organization name.
 - **Repository Name:** the exact name of your fork.
+- **Branch:** usually `main`; use a feature branch such as `feat/awards-section` while testing changes.
 - **Personal Access Token:** the token you created above.
 
 After sign-in, EasySite loads your current `_data` files from GitHub.
@@ -428,6 +429,8 @@ Check that the `_data` files exist in your repository and contain valid JSON. Al
 ### Save All fails
 
 Read the error shown near the Save All button. Common causes are missing required fields, an expired token, a renamed repository, or a token without write permission.
+
+If you are saving to a feature branch, make sure that branch has already been pushed to GitHub and contains the `_data` folder.
 
 ### Uploaded images or PDFs do not appear immediately
 
