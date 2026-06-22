@@ -1,5 +1,13 @@
 {
   "heading": "Writing",
-  "desc": "",
-  "posts": []
+  "desc": "Here's what's been going on in my life.",
+  "posts": [
+    {
+      "title": "I Got an Offer from Google!!!",
+      "date": "2026-06-02",
+      "summary": "After 3 months of applying, I finally got an offer letter.",
+      "tags": [],
+      "link": ""
+    }
+  ]
 }
