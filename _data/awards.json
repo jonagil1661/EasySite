@@ -4,8 +4,15 @@
     {
       "title": "Dean's List",
       "issuer": "Georgia Institute of Technology",
-      "date": "2026-06-16",
-      "desc": "Georgia Tech loves me!",
+      "date": "2026-06-22",
+      "desc": "",
+      "link": ""
+    },
+    {
+      "title": "2020 Olympics Gold Medalist",
+      "issuer": "Olympics",
+      "date": "2020-08-10",
+      "desc": "Gold Medal for Badminton - Men's Singles",
       "link": ""
     }
   ]

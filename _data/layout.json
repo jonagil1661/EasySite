@@ -1,9 +1,9 @@
 {
   "sectionOrder": [
-    "about",
-    "awards"
+    "about"
   ],
   "hiddenSections": [
+    "awards",
     "experience",
     "education",
     "projects",

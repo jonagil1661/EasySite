@@ -465,6 +465,11 @@
       <label style="display:block;font-size:0.82rem;font-weight:600;color:#555;margin-bottom:5px;">Repository Name <span style="color:var(--red);">*</span></label>
       <input type="text" id="gh-repo" placeholder="your-repo-name" required style="width:100%;padding:9px 12px;border:1.5px solid #dee2e6;border-radius:7px;font-size:0.9rem;font-family:inherit;" />
     </div>
+    <div style="text-align:left;margin-bottom:12px;">
+      <label style="display:block;font-size:0.82rem;font-weight:600;color:#555;margin-bottom:5px;">Branch <span style="color:var(--red);">*</span></label>
+      <input type="text" id="gh-branch" placeholder="main" required style="width:100%;padding:9px 12px;border:1.5px solid #dee2e6;border-radius:7px;font-size:0.9rem;font-family:inherit;" />
+      <p style="font-size:0.75rem;color:#777;margin-top:5px;">Use your feature branch in dev mode, e.g. <code>feat/awards-section</code>.</p>
+    </div>
     <div style="text-align:left;margin-bottom:20px;">
       <label style="display:block;font-size:0.82rem;font-weight:600;color:#555;margin-bottom:5px;">Personal Access Token <span style="color:var(--red);">*</span><span class="info-wrap"><span class="info-icon">i</span><span class="info-tooltip">A PAT lets the admin save changes directly to your GitHub repo.<br><br><strong>How to create one:</strong><br>1. Go to GitHub → <em>Settings → Developer settings → Personal access tokens → Tokens (classic)</em><br>2. Click <strong>Generate new token (classic)</strong><br>3. Give it a name (e.g. "portfolio admin")<br>4. Set <strong>Expiration</strong> to <strong>No expiration</strong><br>5. Under <strong>Scopes</strong>, check ✓ <strong>public_repo</strong> only (under the repo section)<br>6. Click <strong>Generate token</strong> and copy it<br>7. Paste it here — it won't be shown again!</span></span></label>
       <input type="password" id="gh-pat" placeholder="ghp_..." required style="width:100%;padding:9px 12px;border:1.5px solid #dee2e6;border-radius:7px;font-size:0.9rem;font-family:inherit;" />
@@ -947,21 +952,25 @@
       pat:   localStorage.getItem('gh_pat')   || '',
       owner: localStorage.getItem('gh_owner') || '',
       repo:  localStorage.getItem('gh_repo')  || '',
+      branch: localStorage.getItem('gh_branch') || 'main',
     };
   }
-  function saveCfg(owner, repo, pat) {
+  function saveCfg(owner, repo, branch, pat) {
     localStorage.setItem('gh_owner', owner);
     localStorage.setItem('gh_repo',  repo);
+    localStorage.setItem('gh_branch', branch);
     localStorage.setItem('gh_pat',   pat);
   }
   function clearCfg() {
-    ['gh_pat','gh_owner','gh_repo'].forEach(k => localStorage.removeItem(k));
+    ['gh_pat','gh_owner','gh_repo','gh_branch'].forEach(k => localStorage.removeItem(k));
   }
 
   // ── GitHub API helpers ──
   async function _ghFetch(path, opts = {}) {
-    const { pat, owner, repo } = getCfg();
-    return fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
+    const { pat, owner, repo, branch } = getCfg();
+    const method = (opts.method || 'GET').toUpperCase();
+    const refQuery = method === 'GET' ? `?ref=${encodeURIComponent(branch)}` : '';
+    return fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}${refQuery}`, {
       ...opts,
       headers: {
         Authorization: `Bearer ${pat}`,
@@ -988,19 +997,21 @@
 
   async function ghWrite(path, content) {
     const sha = await _getSha(path);
+    const { branch } = getCfg();
     const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2))));
     const res = await _ghFetch(path, {
       method: 'PUT',
-      body: JSON.stringify({ message: `cms: update ${path}`, content: encoded, ...(sha && { sha }) }),
+      body: JSON.stringify({ message: `cms: update ${path}`, content: encoded, branch, ...(sha && { sha }) }),
     });
     if (!res.ok) { const e = await res.json(); throw new Error(e.message || `Write failed: ${path}`); }
   }
 
   async function ghWriteBase64(path, base64) {
     const sha = await _getSha(path);
+    const { branch } = getCfg();
     const res = await _ghFetch(path, {
       method: 'PUT',
-      body: JSON.stringify({ message: `cms: upload ${path}`, content: base64, ...(sha && { sha }) }),
+      body: JSON.stringify({ message: `cms: upload ${path}`, content: base64, branch, ...(sha && { sha }) }),
     });
     if (!res.ok) { const e = await res.json(); throw new Error(e.message || `Upload failed: ${path}`); }
   }
@@ -1015,16 +1026,17 @@
   }
 
   function rawUrl(path) {
-    const { owner, repo } = getCfg();
-    return `https://raw.githubusercontent.com/${owner}/${repo}/main/${path}?t=${Date.now()}`;
+    const { owner, repo, branch } = getCfg();
+    return `https://raw.githubusercontent.com/${owner}/${repo}/refs/heads/${branch}/${path}?t=${Date.now()}`;
   }
 
   // ── Auth ──
   window.doLogin = async function() {
-    const owner = document.getElementById('gh-owner').value.trim();
-    const repo  = document.getElementById('gh-repo').value.trim();
-    const pat   = document.getElementById('gh-pat').value.trim();
-    if (!owner || !repo || !pat) { showLoginError('All three fields are required.'); return; }
+    const owner  = document.getElementById('gh-owner').value.trim();
+    const repo   = document.getElementById('gh-repo').value.trim();
+    const branch = document.getElementById('gh-branch').value.trim() || 'main';
+    const pat    = document.getElementById('gh-pat').value.trim();
+    if (!owner || !repo || !branch || !pat) { showLoginError('All four fields are required.'); return; }
     const btn = document.querySelector('#login-screen .google-btn');
     btn.disabled = true; btn.textContent = 'Verifying…';
     try {
@@ -1032,7 +1044,11 @@
         headers: { Authorization: `Bearer ${pat}`, Accept: 'application/vnd.github+json' },
       });
       if (!res.ok) throw new Error('Repository not found or token is invalid. Check your username, repo name, and PAT.');
-      saveCfg(owner, repo, pat);
+      const branchRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/_data?ref=${encodeURIComponent(branch)}`, {
+        headers: { Authorization: `Bearer ${pat}`, Accept: 'application/vnd.github+json' },
+      });
+      if (!branchRes.ok) throw new Error(`Branch "${branch}" was not found or does not contain _data. Check the branch name and push it to GitHub first.`);
+      saveCfg(owner, repo, branch, pat);
       _showAdminShell();
       loadAll();
     } catch(e) {
@@ -1042,7 +1058,7 @@
     }
   };
 
-  ['gh-owner','gh-repo','gh-pat'].forEach(id => {
+  ['gh-owner','gh-repo','gh-branch','gh-pat'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
   });
@@ -1059,22 +1075,28 @@
   }
 
   function _showAdminShell() {
-    const { owner, repo } = getCfg();
+    const { owner, repo, branch } = getCfg();
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('admin-shell').style.display = 'block';
-    document.getElementById('admin-email').textContent = owner + '/' + repo;
+    document.getElementById('admin-email').textContent = owner + '/' + repo + ' @ ' + branch;
   }
 
   // Auto-login if credentials already stored
   (function() {
-    const { owner, repo, pat } = getCfg();
-    if (!owner || !repo || !pat) return;
+    const params = new URLSearchParams(window.location.search);
+    const branchFromUrl = params.get('branch');
+    const savedBranch = localStorage.getItem('gh_branch');
+    const { owner, repo, branch, pat } = getCfg();
     const ownerEl = document.getElementById('gh-owner');
     const repoEl  = document.getElementById('gh-repo');
+    const branchEl = document.getElementById('gh-branch');
     const patEl   = document.getElementById('gh-pat');
     if (ownerEl) ownerEl.value = owner;
     if (repoEl)  repoEl.value  = repo;
+    if (branchEl) branchEl.value = branchFromUrl || savedBranch || 'main';
     if (patEl)   patEl.value   = pat;
+    if (branchFromUrl) localStorage.setItem('gh_branch', branchFromUrl);
+    if (!owner || !repo || !pat || (!savedBranch && !branchFromUrl)) return;
     fetch(`https://api.github.com/repos/${owner}/${repo}`, {
       headers: { Authorization: `Bearer ${pat}`, Accept: 'application/vnd.github+json' },
     }).then(res => { if (res.ok) { _showAdminShell(); loadAll(); } });
@@ -1564,6 +1586,7 @@
   window.addAwardCard = (data = {}) => {
     const div = document.createElement('div');
     div.className = 'card';
+    const today = new Date().toISOString().slice(0, 10);
     div.innerHTML = `
       <div class="card-header">
         <span class="drag-handle" style="cursor:grab;margin-right:8px;opacity:0.4;font-size:1.1rem;">⠿</span>
@@ -1571,19 +1594,25 @@
         <button class="btn btn-danger btn-sm" onclick="this.closest('.card').remove()">Remove</button>
       </div>
       <label>Title <span style="color:var(--red);">*</span></label>
-      <input type="text" class="award-title" placeholder="Best Hack" value="${(data.title||'').replace(/"/g,'&quot;')}" oninput="this.closest('.card').querySelector('.list-item-title').textContent=this.value||'New Award'" />
-      <label>Issuer / Organization</label>
-      <input type="text" class="award-issuer" placeholder="HackGT" value="${(data.issuer||'').replace(/"/g,'&quot;')}" />
-      <label>Date</label>
-      <input type="date" class="award-date" value="${data.date||''}" />
+      <input type="text" class="award-title" placeholder="Dean's List" value="${(data.title||'').replace(/"/g,'&quot;')}" oninput="this.closest('.card').querySelector('.list-item-title').textContent=this.value||'New Award'" />
+      <label>Issuer / Organization <span style="color:var(--red);">*</span></label>
+      <input type="text" class="award-issuer" placeholder="Georgia Institute of Technology" value="${(data.issuer||'').replace(/"/g,'&quot;')}" required />
+      <label>Date <span style="color:var(--red);">*</span></label>
+      <input type="date" class="award-date" value="${data.date||''}" max="${today}" required />
       <label>Description</label>
       <textarea class="award-desc" rows="3" placeholder="Brief description of the award...">${data.desc||''}</textarea>
-      <label>Link <span style="font-weight:400;opacity:0.6;font-size:0.82rem;">(optional)</span></label>
+      <label>Link</label>
       <input type="url" class="award-link" placeholder="https://..." value="${data.link||''}" />
     `;
     document.getElementById('awards-list').appendChild(div);
     checkDirty();
   };
+
+  function isValidAwardDate(value) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+    const parsed = new Date(value + 'T00:00:00');
+    return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
+  }
 
   function getAwardsData() {
     return Array.from(document.querySelectorAll('#awards-list .card')).map(card => ({
@@ -2173,6 +2202,18 @@
       });
 
       // Awards
+      const today = new Date().toISOString().slice(0, 10);
+      for (const card of document.querySelectorAll('#awards-list .card')) {
+        const title = card.querySelector('.award-title').value.trim();
+        const issuer = card.querySelector('.award-issuer').value.trim();
+        const date = card.querySelector('.award-date').value;
+        if (!title || !issuer || !date)
+          throw new Error('Awards: title, issuer / organization, and date are required on all entries.');
+        if (!isValidAwardDate(date))
+          throw new Error('Awards: date must be a valid date.');
+        if (date > today)
+          throw new Error('Awards: date cannot be in the future.');
+      }
       await ghWrite('_data/awards.json', {
         heading: document.getElementById('awards-heading').value.trim(),
         items:   getAwardsData(),
@@ -2471,6 +2512,85 @@
     showError(input, getErrorMsg(input));
   }
 
+  function validateRequiredField(field, msg, invalids) {
+    if (!field) return;
+    if (!field.value.trim()) {
+      showError(field, msg);
+      invalids.push(field);
+    } else if (field.classList.contains('field-invalid') && field.nextElementSibling?.classList.contains('field-error-msg')) {
+      showError(field, null);
+    }
+  }
+
+  function validateCardFields(cardSelector, fields, invalids) {
+    document.querySelectorAll(cardSelector).forEach(card => {
+      fields.forEach(([fieldSelector, msg]) => validateRequiredField(card.querySelector(fieldSelector), msg, invalids));
+    });
+  }
+
+  function isValidDateValue(value) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+    const parsed = new Date(value + 'T00:00:00');
+    return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
+  }
+
+  function validateAllRequiredFields() {
+    const invalids = [];
+    validateRequiredField(document.getElementById('hero-tagline'), 'Hero tagline is required', invalids);
+    validateRequiredField(document.getElementById('hero-name'), 'Hero name is required', invalids);
+    validateRequiredField(document.getElementById('hero-desc'), 'Hero description is required', invalids);
+    validateRequiredField(document.getElementById('about-bio'), 'About bio is required', invalids);
+
+    validateCardFields('#exp-list .card', [
+      ['.exp-company', 'Company is required'],
+      ['.exp-role', 'Role is required'],
+      ['.exp-start', 'Start date is required'],
+    ], invalids);
+
+    validateCardFields('#edu-list .card', [
+      ['.edu-institution', 'Institution is required'],
+      ['.edu-location', 'Location is required'],
+      ['.edu-degree', 'Degree is required'],
+      ['.edu-start', 'Start date is required'],
+      ['.edu-end', 'End date is required'],
+    ], invalids);
+
+    validateCardFields('#proj-list .card', [
+      ['.proj-name', 'Project name is required'],
+      ['.proj-start', 'Project start date is required'],
+      ['.proj-desc', 'Project description is required'],
+    ], invalids);
+
+    validateCardFields('#hobbies-list .card', [['.hobby-label', 'Hobby label is required']], invalids);
+    validateCardFields('#trips-list .card', [['.trip-label', 'Trip label is required']], invalids);
+    validateCardFields('#gear-list .card', [['.gear-name', 'Gear item name is required']], invalids);
+    validateCardFields('#notes-list .card', [['.note-title', 'Note title is required']], invalids);
+    validateCardFields('#blog-list .card', [['.blog-title', 'Blog post title is required']], invalids);
+    validateCardFields('#cert-list .card', [['.cert-name', 'Certification name is required']], invalids);
+    validateCardFields('#research-list .card', [['.research-title', 'Research title is required']], invalids);
+
+    const today = new Date().toISOString().slice(0, 10);
+    document.querySelectorAll('#awards-list .card').forEach(card => {
+      validateRequiredField(card.querySelector('.award-title'), 'Award title is required', invalids);
+      validateRequiredField(card.querySelector('.award-issuer'), 'Issuer / organization is required', invalids);
+      const date = card.querySelector('.award-date');
+      validateRequiredField(date, 'Award date is required', invalids);
+      if (date && date.value.trim()) {
+        let msg = null;
+        if (!isValidDateValue(date.value)) msg = 'Enter a valid award date';
+        else if (date.value > today) msg = 'Award date cannot be in the future';
+        if (msg) {
+          showError(date, msg);
+          invalids.push(date);
+        } else if (date.classList.contains('field-invalid')) {
+          showError(date, null);
+        }
+      }
+    });
+
+    return invalids;
+  }
+
   // Event delegation — catches statically rendered AND dynamically added inputs
   document.addEventListener('blur', function(e) {
     const el = e.target;
@@ -2489,7 +2609,7 @@
   // Pre-save validation — block save if any field is invalid
   const origSaveAll = window.saveAll;
   window.saveAll = async function() {
-    const invalids = [];
+    const invalids = validateAllRequiredFields();
     document.querySelectorAll('input[type="url"], input[data-validate="email"]').forEach(input => {
       validateInput(input);
       if (input.classList.contains('field-invalid')) invalids.push(input);
