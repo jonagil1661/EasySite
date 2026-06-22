@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "institution": "University of Georgia",
+    "location": "Athens, GA",
+    "degree": "B.S. Computer Science",
+    "start": "Aug 2023",
+    "end": "Aug 2",
+    "gpa": "",
+    "coursework": [],
+    "logoURL": null
+  }
+]
