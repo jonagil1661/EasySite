@@ -1510,13 +1510,13 @@
       </div>
       <label>Title <span style="color:var(--red);">*</span></label>
       <input type="text" class="blog-title" placeholder="My First Post" value="${(data.title||'').replace(/"/g,'&quot;')}" oninput="this.closest('.card').querySelector('.list-item-title').textContent=this.value||'New Post'" />
-      <label>Date</label>
-      <input type="date" class="blog-date" value="${data.date||''}" />
-      <label>Summary</label>
-      <textarea class="blog-summary" rows="3" placeholder="A short description shown on the card...">${data.summary||''}</textarea>
+      <label>Date <span style="color:var(--red);">*</span></label>
+      <input type="date" class="blog-date" value="${data.date||''}" required />
+      <label>Summary <span style="color:var(--red);">*</span></label>
+      <textarea class="blog-summary" rows="3" placeholder="A short description shown on the card..." required>${data.summary||''}</textarea>
       <label>Tags <span style="font-weight:400;opacity:0.6;font-size:0.82rem;">(comma-separated)</span></label>
       <input type="text" class="blog-tags" placeholder="machine learning, python" value="${(data.tags||[]).join(', ')}" />
-      <label>Link <span style="font-weight:400;opacity:0.6;font-size:0.82rem;">(optional — URL to full post)</span></label>
+      <label>Link</label>
       <input type="url" class="blog-link" placeholder="https://medium.com/..." value="${data.link||''}" />
     `;
     document.getElementById('blog-list').appendChild(div);
@@ -2565,9 +2565,25 @@
     validateCardFields('#trips-list .card', [['.trip-label', 'Trip label is required']], invalids);
     validateCardFields('#gear-list .card', [['.gear-name', 'Gear item name is required']], invalids);
     validateCardFields('#notes-list .card', [['.note-title', 'Note title is required']], invalids);
-    validateCardFields('#blog-list .card', [['.blog-title', 'Blog post title is required']], invalids);
+    validateCardFields('#blog-list .card', [
+      ['.blog-title', 'Blog post title is required'],
+      ['.blog-date', 'Blog post date is required'],
+      ['.blog-summary', 'Blog post summary is required'],
+    ], invalids);
     validateCardFields('#cert-list .card', [['.cert-name', 'Certification name is required']], invalids);
     validateCardFields('#research-list .card', [['.research-title', 'Research title is required']], invalids);
+
+    document.querySelectorAll('#blog-list .card').forEach(card => {
+      const date = card.querySelector('.blog-date');
+      if (date && date.value.trim()) {
+        if (!isValidDateValue(date.value)) {
+          showError(date, 'Enter a valid blog post date');
+          invalids.push(date);
+        } else if (date.classList.contains('field-invalid')) {
+          showError(date, null);
+        }
+      }
+    });
 
     const today = new Date().toISOString().slice(0, 10);
     document.querySelectorAll('#awards-list .card').forEach(card => {
