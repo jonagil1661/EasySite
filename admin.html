@@ -1502,6 +1502,7 @@
   window.addBlogCard = (data = {}) => {
     const div = document.createElement('div');
     div.className = 'card';
+    const today = new Date().toISOString().slice(0, 10);
     div.innerHTML = `
       <div class="card-header">
         <span class="drag-handle" style="cursor:grab;margin-right:8px;opacity:0.4;font-size:1.1rem;">⠿</span>
@@ -1511,7 +1512,7 @@
       <label>Title <span style="color:var(--red);">*</span></label>
       <input type="text" class="blog-title" placeholder="My First Post" value="${(data.title||'').replace(/"/g,'&quot;')}" oninput="this.closest('.card').querySelector('.list-item-title').textContent=this.value||'New Post'" />
       <label>Date <span style="color:var(--red);">*</span></label>
-      <input type="date" class="blog-date" value="${data.date||''}" required />
+      <input type="date" class="blog-date" value="${data.date||''}" max="${today}" required />
       <label>Summary <span style="color:var(--red);">*</span></label>
       <textarea class="blog-summary" rows="3" placeholder="A short description shown on the card..." required>${data.summary||''}</textarea>
       <label>Tags <span style="font-weight:400;opacity:0.6;font-size:0.82rem;">(comma-separated)</span></label>
@@ -2573,11 +2574,15 @@
     validateCardFields('#cert-list .card', [['.cert-name', 'Certification name is required']], invalids);
     validateCardFields('#research-list .card', [['.research-title', 'Research title is required']], invalids);
 
+    const today = new Date().toISOString().slice(0, 10);
     document.querySelectorAll('#blog-list .card').forEach(card => {
       const date = card.querySelector('.blog-date');
       if (date && date.value.trim()) {
-        if (!isValidDateValue(date.value)) {
-          showError(date, 'Enter a valid blog post date');
+        let msg = null;
+        if (!isValidDateValue(date.value)) msg = 'Enter a valid blog post date';
+        else if (date.value > today) msg = 'Blog post date cannot be in the future';
+        if (msg) {
+          showError(date, msg);
           invalids.push(date);
         } else if (date.classList.contains('field-invalid')) {
           showError(date, null);
@@ -2585,7 +2590,6 @@
       }
     });
 
-    const today = new Date().toISOString().slice(0, 10);
     document.querySelectorAll('#awards-list .card').forEach(card => {
       validateRequiredField(card.querySelector('.award-title'), 'Award title is required', invalids);
       validateRequiredField(card.querySelector('.award-issuer'), 'Issuer / organization is required', invalids);
