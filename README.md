@@ -2,7 +2,7 @@
 
 EasySite is a fork-and-go personal website template for GitHub Pages. It gives you a polished personal website plus a built-in no-code admin panel, so you can update your content without editing code files.
 
-There is no backend to deploy. The live website is `index.html`, the admin panel is `admin.html`, and your content lives in `_data/*.json`. When you save from the admin panel, EasySite writes those JSON files and uploaded assets directly to your GitHub repository using the GitHub Contents API.
+There is no backend to deploy. The live website is `index.html`, the admin panel is `admin.html`, and your content lives in `_data/*.json`. When you save from the admin panel, EasySite writes those JSON files and uploaded assets directly to your GitHub repository in a single Git commit.
 
 ## What You Get
 
@@ -23,7 +23,7 @@ EasySite has three main parts:
 - `admin.html` is the private editing interface you use to manage the site.
 - `_data/*.json` stores the content that both files read and write.
 
-The admin panel asks for your GitHub username, repository name, branch, and a Personal Access Token. Those values are stored only in your browser's `localStorage`. When you click **Save All**, the admin commits updates directly to the selected branch with messages like `cms: update _data/hero.json`.
+The admin panel asks for your GitHub username, repository name, branch, and a Personal Access Token. Those values are stored only in your browser's `localStorage`. When you click **Save All**, the admin batches your JSON and asset updates into one commit on the selected branch.
 
 ## Quick Start
 

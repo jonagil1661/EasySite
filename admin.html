@@ -950,7 +950,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 
-<!-- GitHub Contents API -->
+<!-- GitHub API: Contents for reads, Git Data for single-commit saves -->
 <script>
 
   // ── Config (localStorage) ──
@@ -987,11 +987,94 @@
     });
   }
 
-  async function _getSha(path) {
-    const res = await _ghFetch(path);
-    if (!res.ok) return null;
-    const j = await res.json();
-    return j.sha || null;
+  function _branchRefPath(branch) {
+    return 'heads/' + branch.split('/').map(encodeURIComponent).join('/');
+  }
+
+  async function _gitFetch(path, opts = {}) {
+    const { pat, owner, repo } = getCfg();
+    return fetch(`https://api.github.com/repos/${owner}/${repo}/git/${path}`, {
+      ...opts,
+      headers: {
+        Authorization: `Bearer ${pat}`,
+        Accept: 'application/vnd.github+json',
+        ...(opts.body ? { 'Content-Type': 'application/json' } : {}),
+      },
+    });
+  }
+
+  async function _parseGitResponse(res, fallback) {
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(body.message || fallback);
+    return body;
+  }
+
+  let _pendingWrites = null;
+
+  function beginSaveBatch() {
+    _pendingWrites = new Map();
+  }
+
+  function queueSaveFile(path, content, encoding = 'utf-8') {
+    if (!_pendingWrites) throw new Error('Save batch was not started.');
+    _pendingWrites.set(path, { content, encoding });
+  }
+
+  async function commitSaveBatch(message = 'cms: update site content') {
+    if (!_pendingWrites) return;
+    const writes = Array.from(_pendingWrites.entries());
+    _pendingWrites = null;
+    if (!writes.length) return;
+
+    const { branch } = getCfg();
+    const refPath = _branchRefPath(branch);
+    const ref = await _parseGitResponse(
+      await _gitFetch(`ref/${refPath}`),
+      `Could not read branch "${branch}".`
+    );
+    const parentSha = ref.object?.sha;
+    if (!parentSha) throw new Error(`Could not read latest commit for branch "${branch}".`);
+
+    const parentCommit = await _parseGitResponse(
+      await _gitFetch(`commits/${parentSha}`),
+      `Could not read latest commit for branch "${branch}".`
+    );
+
+    const treeEntries = [];
+    for (const [path, file] of writes) {
+      const blob = await _parseGitResponse(
+        await _gitFetch('blobs', {
+          method: 'POST',
+          body: JSON.stringify({ content: file.content, encoding: file.encoding }),
+        }),
+        `Could not create blob for ${path}.`
+      );
+      treeEntries.push({ path, mode: '100644', type: 'blob', sha: blob.sha });
+    }
+
+    const tree = await _parseGitResponse(
+      await _gitFetch('trees', {
+        method: 'POST',
+        body: JSON.stringify({ base_tree: parentCommit.tree.sha, tree: treeEntries }),
+      }),
+      'Could not create commit tree.'
+    );
+
+    const commit = await _parseGitResponse(
+      await _gitFetch('commits', {
+        method: 'POST',
+        body: JSON.stringify({ message, tree: tree.sha, parents: [parentSha] }),
+      }),
+      'Could not create commit.'
+    );
+
+    await _parseGitResponse(
+      await _gitFetch(`refs/${refPath}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ sha: commit.sha }),
+      }),
+      `Could not update branch "${branch}". Pull the latest changes and try again.`
+    );
   }
 
   async function ghRead(path) {
@@ -1003,24 +1086,11 @@
   }
 
   async function ghWrite(path, content) {
-    const sha = await _getSha(path);
-    const { branch } = getCfg();
-    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2))));
-    const res = await _ghFetch(path, {
-      method: 'PUT',
-      body: JSON.stringify({ message: `cms: update ${path}`, content: encoded, branch, ...(sha && { sha }) }),
-    });
-    if (!res.ok) { const e = await res.json(); throw new Error(e.message || `Write failed: ${path}`); }
+    queueSaveFile(path, JSON.stringify(content, null, 2) + '\n');
   }
 
   async function ghWriteBase64(path, base64) {
-    const sha = await _getSha(path);
-    const { branch } = getCfg();
-    const res = await _ghFetch(path, {
-      method: 'PUT',
-      body: JSON.stringify({ message: `cms: upload ${path}`, content: base64, branch, ...(sha && { sha }) }),
-    });
-    if (!res.ok) { const e = await res.json(); throw new Error(e.message || `Upload failed: ${path}`); }
+    queueSaveFile(path, base64, 'base64');
   }
 
   function blobToBase64(blob) {
@@ -2040,6 +2110,8 @@
     const statusEl = document.getElementById('layout-status');
     statusEl.textContent = 'Saving…';
     try {
+      beginSaveBatch();
+
       // Hero
       const tagline  = document.getElementById('hero-tagline').value.trim();
       const heroName = document.getElementById('hero-name').value.trim();
@@ -2295,9 +2367,11 @@
       const hidden = Array.from(document.querySelectorAll('#nav-hidden [data-section]')).map(a => a.dataset.section);
       await ghWrite('_data/layout.json', { sectionOrder: active, hiddenSections: hidden });
 
+      await commitSaveBatch('cms: update site content');
       setCleanSnapshot();
       statusEl.textContent = '✓ All saved!';
     } catch(e) {
+      _pendingWrites = null;
       statusEl.textContent = '✗ ' + e.message;
     }
     setTimeout(() => { statusEl.textContent = ''; }, 3500);
