@@ -134,6 +134,14 @@
     }
     .admin-sidebar nav a:hover { background: var(--a-sidebar-bg); color: var(--a-text); }
     .admin-sidebar nav a.active { color: var(--a-text); border-left-color: var(--gold); background: var(--a-input-bg); font-weight: 700; }
+    .admin-sidebar nav a.nav-error {
+      color: #fca5a5;
+      border-left-color: var(--red);
+      background: rgba(220,50,50,0.12);
+      font-weight: 700;
+      opacity: 1;
+    }
+    .admin-sidebar nav a.nav-error svg { color: #fca5a5; }
     .admin-sidebar nav a svg { flex-shrink: 0; }
 
     /* ── Main content ── */
@@ -183,6 +191,7 @@
     .nav-zone-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--a-text-dim); padding: 10px 20px 4px; }
     .nav-zone-label--hidden { color: var(--a-text-dim2); border-top: 1px solid var(--a-sidebar-border); margin-top: 6px; padding-top: 14px; }
     #nav-hidden a { opacity: 0.5; }
+    #nav-hidden a.nav-error { opacity: 1; }
     #nav-hidden a:hover { opacity: 1; }
     #nav-active, #nav-hidden { min-height: 32px; }
     .sidebar-actions {
@@ -803,8 +812,6 @@
           <p>Write posts that appear in the Blog section of your site.</p>
         </div>
         <div class="card">
-          <label>Section heading</label>
-          <input type="text" id="blog-heading" placeholder="Writing" />
           <label>Section description</label>
           <textarea id="blog-desc" rows="2" placeholder="Thoughts on tech, life, and everything in between."></textarea>
         </div>
@@ -1152,14 +1159,20 @@
   });
 
   // ── Sidebar nav ──
+  function showPanel(panel) {
+    const link = document.querySelector(`.admin-sidebar nav a[data-panel="${panel}"]`);
+    const panelEl = document.getElementById('panel-' + panel);
+    if (!link || !panelEl) return;
+    document.querySelectorAll('.admin-sidebar nav a').forEach(a => a.classList.remove('active'));
+    document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
+    link.classList.add('active');
+    panelEl.classList.add('active');
+  }
+
   document.querySelectorAll('.admin-sidebar nav a').forEach(link => {
     link.addEventListener('click', e => {
       e.preventDefault();
-      const panel = link.dataset.panel;
-      document.querySelectorAll('.admin-sidebar nav a').forEach(a => a.classList.remove('active'));
-      document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
-      link.classList.add('active');
-      document.getElementById('panel-' + panel).classList.add('active');
+      showPanel(link.dataset.panel);
     });
   });
 
@@ -1494,7 +1507,6 @@
   async function loadBlog() {
     const d = await ghRead('_data/blog.json');
     if (!d) return;
-    document.getElementById('blog-heading').value = d.heading || '';
     document.getElementById('blog-desc').value    = d.desc    || '';
     (d.posts || []).forEach(p => addBlogCard(p));
   }
@@ -1502,6 +1514,7 @@
   window.addBlogCard = (data = {}) => {
     const div = document.createElement('div');
     div.className = 'card';
+    const today = new Date().toISOString().slice(0, 10);
     div.innerHTML = `
       <div class="card-header">
         <span class="drag-handle" style="cursor:grab;margin-right:8px;opacity:0.4;font-size:1.1rem;">⠿</span>
@@ -1510,14 +1523,12 @@
       </div>
       <label>Title <span style="color:var(--red);">*</span></label>
       <input type="text" class="blog-title" placeholder="My First Post" value="${(data.title||'').replace(/"/g,'&quot;')}" oninput="this.closest('.card').querySelector('.list-item-title').textContent=this.value||'New Post'" />
-      <label>Date</label>
-      <input type="date" class="blog-date" value="${data.date||''}" />
-      <label>Summary</label>
-      <textarea class="blog-summary" rows="3" placeholder="A short description shown on the card...">${data.summary||''}</textarea>
+      <label>Date <span style="color:var(--red);">*</span></label>
+      <input type="date" class="blog-date" value="${data.date||''}" max="${today}" required />
+      <label>Summary <span style="color:var(--red);">*</span></label>
+      <textarea class="blog-summary" rows="3" placeholder="A short description shown on the card..." required>${data.summary||''}</textarea>
       <label>Tags <span style="font-weight:400;opacity:0.6;font-size:0.82rem;">(comma-separated)</span></label>
       <input type="text" class="blog-tags" placeholder="machine learning, python" value="${(data.tags||[]).join(', ')}" />
-      <label>Link <span style="font-weight:400;opacity:0.6;font-size:0.82rem;">(optional — URL to full post)</span></label>
-      <input type="url" class="blog-link" placeholder="https://medium.com/..." value="${data.link||''}" />
     `;
     document.getElementById('blog-list').appendChild(div);
     checkDirty();
@@ -1529,7 +1540,6 @@
       date:    card.querySelector('.blog-date').value,
       summary: card.querySelector('.blog-summary').value.trim(),
       tags:    card.querySelector('.blog-tags').value.split(',').map(t => t.trim()).filter(Boolean),
-      link:    card.querySelector('.blog-link').value.trim(),
     }));
   }
 
@@ -2190,7 +2200,7 @@
 
       // Blog
       await ghWrite('_data/blog.json', {
-        heading: document.getElementById('blog-heading').value.trim(),
+        heading: 'Blog',
         desc:    document.getElementById('blog-desc').value.trim(),
         posts:   getBlogData(),
       });
@@ -2279,6 +2289,7 @@
       });
 
       // Layout
+      sortHiddenSections();
       const active = Array.from(document.querySelectorAll('#nav-active [data-section]')).map(a => a.dataset.section);
       const hidden = Array.from(document.querySelectorAll('#nav-hidden [data-section]')).map(a => a.dataset.section);
       await ghWrite('_data/layout.json', { sectionOrder: active, hiddenSections: hidden });
@@ -2351,6 +2362,23 @@
       const link = allLinks.find(l => l.dataset.section === section);
       if (link) hiddenEl.appendChild(link);
     });
+    sortHiddenSections();
+  }
+
+  function getNavLabel(link) {
+    return Array.from(link.childNodes)
+      .filter(node => node.nodeType === Node.TEXT_NODE)
+      .map(node => node.textContent.trim())
+      .join(' ')
+      .trim()
+      .toLowerCase();
+  }
+
+  function sortHiddenSections() {
+    const hiddenEl = document.getElementById('nav-hidden');
+    Array.from(hiddenEl.querySelectorAll('[data-section]'))
+      .sort((a, b) => getNavLabel(a).localeCompare(getNavLabel(b)))
+      .forEach(link => hiddenEl.appendChild(link));
   }
 
   const navSortableOpts = {
@@ -2358,7 +2386,7 @@
     handle: '.nav-drag-handle',
     animation: 150,
     ghostClass: 'sortable-ghost',
-    onEnd: checkDirty,
+    onEnd: () => { sortHiddenSections(); checkDirty(); },
   };
   Sortable.create(document.getElementById('nav-active'), navSortableOpts);
   Sortable.create(document.getElementById('nav-hidden'), navSortableOpts);
@@ -2512,6 +2540,42 @@
     showError(input, getErrorMsg(input));
   }
 
+  function getSpecialDateError(field) {
+    if (!field?.matches('.blog-date, .award-date') || !field.value.trim()) return null;
+    const label = field.classList.contains('blog-date') ? 'Blog post date' : 'Award date';
+    const today = new Date().toISOString().slice(0, 10);
+    if (!isValidDateValue(field.value)) return `Enter a valid ${label.toLowerCase()}`;
+    if (field.value > today) return `${label} cannot be in the future`;
+    return null;
+  }
+
+  function getFieldPanel(field) {
+    const panel = field?.closest('.admin-panel');
+    return panel?.id?.replace(/^panel-/, '') || null;
+  }
+
+  function getPanelNavLink(panel) {
+    return panel ? document.querySelector(`.admin-sidebar nav a[data-panel="${panel}"]`) : null;
+  }
+
+  function clearSectionErrors() {
+    document.querySelectorAll('.admin-sidebar nav a.nav-error').forEach(link => link.classList.remove('nav-error'));
+  }
+
+  function markSectionError(field) {
+    const panel = getFieldPanel(field);
+    const link = getPanelNavLink(panel);
+    if (link) link.classList.add('nav-error');
+    return panel;
+  }
+
+  function clearSectionErrorIfResolved(field) {
+    const panel = getFieldPanel(field);
+    if (!panel) return;
+    const panelEl = document.getElementById('panel-' + panel);
+    if (!panelEl?.querySelector('.field-invalid')) getPanelNavLink(panel)?.classList.remove('nav-error');
+  }
+
   function validateRequiredField(field, msg, invalids) {
     if (!field) return;
     if (!field.value.trim()) {
@@ -2519,6 +2583,7 @@
       invalids.push(field);
     } else if (field.classList.contains('field-invalid') && field.nextElementSibling?.classList.contains('field-error-msg')) {
       showError(field, null);
+      clearSectionErrorIfResolved(field);
     }
   }
 
@@ -2565,11 +2630,30 @@
     validateCardFields('#trips-list .card', [['.trip-label', 'Trip label is required']], invalids);
     validateCardFields('#gear-list .card', [['.gear-name', 'Gear item name is required']], invalids);
     validateCardFields('#notes-list .card', [['.note-title', 'Note title is required']], invalids);
-    validateCardFields('#blog-list .card', [['.blog-title', 'Blog post title is required']], invalids);
+    validateCardFields('#blog-list .card', [
+      ['.blog-title', 'Blog post title is required'],
+      ['.blog-date', 'Blog post date is required'],
+      ['.blog-summary', 'Blog post summary is required'],
+    ], invalids);
     validateCardFields('#cert-list .card', [['.cert-name', 'Certification name is required']], invalids);
     validateCardFields('#research-list .card', [['.research-title', 'Research title is required']], invalids);
 
     const today = new Date().toISOString().slice(0, 10);
+    document.querySelectorAll('#blog-list .card').forEach(card => {
+      const date = card.querySelector('.blog-date');
+      if (date && date.value.trim()) {
+        let msg = null;
+        if (!isValidDateValue(date.value)) msg = 'Enter a valid blog post date';
+        else if (date.value > today) msg = 'Blog post date cannot be in the future';
+        if (msg) {
+          showError(date, msg);
+          invalids.push(date);
+        } else if (date.classList.contains('field-invalid')) {
+          showError(date, null);
+        }
+      }
+    });
+
     document.querySelectorAll('#awards-list .card').forEach(card => {
       validateRequiredField(card.querySelector('.award-title'), 'Award title is required', invalids);
       validateRequiredField(card.querySelector('.award-issuer'), 'Issuer / organization is required', invalids);
@@ -2601,20 +2685,30 @@
   // Re-validate on input so error clears as soon as user fixes it
   document.addEventListener('input', function(e) {
     const el = e.target;
-    if (el.tagName !== 'INPUT') return;
-    if (!el.classList.contains('field-invalid')) return;
+    if (el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA') return;
+    if (!el.classList.contains('field-invalid')) {
+      clearSectionErrorIfResolved(el);
+      return;
+    }
     if (el.type === 'url' || el.dataset.validate === 'email') validateInput(el);
+    else if (el.matches('.blog-date, .award-date')) showError(el, getSpecialDateError(el));
+    else if (el.value.trim()) showError(el, null);
+    clearSectionErrorIfResolved(el);
   }, true);
 
   // Pre-save validation — block save if any field is invalid
   const origSaveAll = window.saveAll;
   window.saveAll = async function() {
+    clearSectionErrors();
     const invalids = validateAllRequiredFields();
     document.querySelectorAll('input[type="url"], input[data-validate="email"]').forEach(input => {
       validateInput(input);
       if (input.classList.contains('field-invalid')) invalids.push(input);
     });
     if (invalids.length) {
+      invalids.forEach(markSectionError);
+      const firstPanel = markSectionError(invalids[0]);
+      if (firstPanel) showPanel(firstPanel);
       invalids[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
       invalids[0].focus();
       const statusEl = document.getElementById('layout-status');
