@@ -1020,6 +1020,17 @@
     _pendingWrites.set(path, { content, encoding });
   }
 
+  function queueDeleteFile(path) {
+    if (!_pendingWrites) throw new Error('Save batch was not started.');
+    if (path) _pendingWrites.set(path, { delete: true });
+  }
+
+  function clearQueuedLogoDeletes() {
+    document.querySelectorAll('#exp-list .card, #edu-list .card').forEach(card => {
+      card._deletedLogoURLs = [];
+    });
+  }
+
   async function commitSaveBatch(message = 'cms: update site content') {
     if (!_pendingWrites) return;
     const writes = Array.from(_pendingWrites.entries());
@@ -1042,6 +1053,10 @@
 
     const treeEntries = [];
     for (const [path, file] of writes) {
+      if (file.delete) {
+        treeEntries.push({ path, mode: '100644', type: 'blob', sha: null });
+        continue;
+      }
       const blob = await _parseGitResponse(
         await _gitFetch('blobs', {
           method: 'POST',
@@ -1357,6 +1372,7 @@
       const data = getDataFn(card);
       const id = card.dataset.id || crypto.randomUUID();
       card.dataset.id = id;
+      (card._deletedLogoURLs || []).forEach(url => queueDeleteFile(url));
       if (data._logoBlob) {
         const base64 = await blobToBase64(data._logoBlob);
         const path = `assets/images/logos/${folder}-${id}.jpg`;
@@ -1365,7 +1381,11 @@
         card._logoBlob = null;
         card._logoURL = path;
         const preview = card.querySelector('.logo-preview');
-        if (preview) { preview.src = rawUrl(path); preview.style.display = 'block'; }
+        if (preview) {
+          preview.src = rawUrl(path);
+          preview.style.display = 'block';
+          preview.dataset.savedPath = path;
+        }
       }
       delete data._logoBlob;
       result.push(data);
@@ -2069,6 +2089,11 @@
       }
       card._logoBlob = null;
       card._logoURL  = null;
+      if (preview.dataset.savedPath) {
+        card._deletedLogoURLs = card._deletedLogoURLs || [];
+        card._deletedLogoURLs.push(preview.dataset.savedPath);
+        delete preview.dataset.savedPath;
+      }
       preview.src = '';
       preview.style.display = 'none';
       syncLogoActionButton();
@@ -2084,6 +2109,11 @@
         if (b.dataset.ratio !== '1') { b.disabled = true; b.classList.add('ratio-btn--locked'); }
       });
       openCropModal(file, (blob, dataUrl) => {
+        if (preview.dataset.savedPath) {
+          card._deletedLogoURLs = card._deletedLogoURLs || [];
+          card._deletedLogoURLs.push(preview.dataset.savedPath);
+          delete preview.dataset.savedPath;
+        }
         card._logoBlob = blob;
         card._logoURL  = null; // new blob replaces any saved URL
         preview.src = dataUrl;
@@ -2096,6 +2126,7 @@
 
     // Restore existing saved URL
     if (card._logoURL === undefined) card._logoURL = preview.src || null;
+    if (card._logoURL) preview.dataset.savedPath = card._logoURL;
     syncLogoActionButton();
   }
 
@@ -2405,6 +2436,7 @@
       await ghWrite('_data/layout.json', { sectionOrder: active, hiddenSections: hidden });
 
       await commitSaveBatch('cms: update site content');
+      clearQueuedLogoDeletes();
       setCleanSnapshot();
       statusEl.textContent = '✓ All saved!';
     } catch(e) {
