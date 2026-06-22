@@ -7,9 +7,19 @@
     "end": "2026-12",
     "gpa": "4.0",
     "coursework": [
-      "CS 1302 Softwar Development",
+      "CS 1302 Software Development",
       "CS 2720 Data Structures & Algorithms"
     ],
     "logoURL": null
+  },
+  {
+    "institution": "Georgia Institute of Technology",
+    "location": "Atlanta, GA",
+    "degree": "M.S. Computer Science",
+    "start": "2025-06",
+    "end": "2026-06",
+    "gpa": "",
+    "coursework": [],
+    "logoURL": "assets/images/logos/edu-4c89e08a-8a3e-47d7-8e3b-29c8c645dc3a.jpg"
   }
 ]
