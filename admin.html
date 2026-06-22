@@ -1586,6 +1586,7 @@
   window.addAwardCard = (data = {}) => {
     const div = document.createElement('div');
     div.className = 'card';
+    const today = new Date().toISOString().slice(0, 10);
     div.innerHTML = `
       <div class="card-header">
         <span class="drag-handle" style="cursor:grab;margin-right:8px;opacity:0.4;font-size:1.1rem;">⠿</span>
@@ -1594,18 +1595,24 @@
       </div>
       <label>Title <span style="color:var(--red);">*</span></label>
       <input type="text" class="award-title" placeholder="Best Hack" value="${(data.title||'').replace(/"/g,'&quot;')}" oninput="this.closest('.card').querySelector('.list-item-title').textContent=this.value||'New Award'" />
-      <label>Issuer / Organization</label>
-      <input type="text" class="award-issuer" placeholder="HackGT" value="${(data.issuer||'').replace(/"/g,'&quot;')}" />
-      <label>Date</label>
-      <input type="date" class="award-date" value="${data.date||''}" />
+      <label>Issuer / Organization <span style="color:var(--red);">*</span></label>
+      <input type="text" class="award-issuer" placeholder="HackGT" value="${(data.issuer||'').replace(/"/g,'&quot;')}" required />
+      <label>Date <span style="color:var(--red);">*</span></label>
+      <input type="date" class="award-date" value="${data.date||''}" max="${today}" required />
       <label>Description</label>
       <textarea class="award-desc" rows="3" placeholder="Brief description of the award...">${data.desc||''}</textarea>
-      <label>Link <span style="font-weight:400;opacity:0.6;font-size:0.82rem;">(optional)</span></label>
+      <label>Link</label>
       <input type="url" class="award-link" placeholder="https://..." value="${data.link||''}" />
     `;
     document.getElementById('awards-list').appendChild(div);
     checkDirty();
   };
+
+  function isValidAwardDate(value) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+    const parsed = new Date(value + 'T00:00:00');
+    return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
+  }
 
   function getAwardsData() {
     return Array.from(document.querySelectorAll('#awards-list .card')).map(card => ({
@@ -2195,6 +2202,18 @@
       });
 
       // Awards
+      const today = new Date().toISOString().slice(0, 10);
+      for (const card of document.querySelectorAll('#awards-list .card')) {
+        const title = card.querySelector('.award-title').value.trim();
+        const issuer = card.querySelector('.award-issuer').value.trim();
+        const date = card.querySelector('.award-date').value;
+        if (!title || !issuer || !date)
+          throw new Error('Awards: title, issuer / organization, and date are required on all entries.');
+        if (!isValidAwardDate(date))
+          throw new Error('Awards: date must be a valid date.');
+        if (date > today)
+          throw new Error('Awards: date cannot be in the future.');
+      }
       await ghWrite('_data/awards.json', {
         heading: document.getElementById('awards-heading').value.trim(),
         items:   getAwardsData(),
