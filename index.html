@@ -1409,7 +1409,7 @@
       const theme = localStorage.getItem('portfolio-theme') || 'auto';
       if (theme !== 'time') return 'particles';
       const period = document.documentElement.getAttribute('data-period') || getCurrentTimePeriod();
-      return period === 'midnight' ? 'shooting-stars' : period === 'day' ? 'clouds' : 'none';
+      return period === 'midnight' ? 'shooting-stars' : period === 'day' ? 'clouds' : period === 'sunset' ? 'particles' : 'none';
     }
 
     let W, H, raf, mode = getInitialBgMode();
@@ -1676,7 +1676,7 @@
     function drawScenery() {
       const p = document.documentElement.getAttribute('data-period');
       if (!p) return;
-      if (p === 'sunset' || p === 'dawn') return;
+      if (p === 'dawn') return;
       _sunAngle += 0.002;
 
       // Moon during midnight
@@ -1765,12 +1765,6 @@
         og.addColorStop(1,   'rgba(80,0,30,0)');
         ctx.beginPath(); ctx.arc(sx, sy, sr * 7, 0, Math.PI * 2);
         ctx.fillStyle = og; ctx.fill();
-        // horizon streak
-        const streak = ctx.createLinearGradient(0, sy - sr * 0.5, 0, sy + sr * 2);
-        streak.addColorStop(0, 'rgba(255,120,20,0.18)');
-        streak.addColorStop(1, 'rgba(200,40,20,0)');
-        ctx.fillStyle = streak;
-        ctx.fillRect(0, sy - sr * 0.5, W, sr * 2.5);
         // disc
         const dg = ctx.createRadialGradient(sx, sy, 0, sx, sy, sr);
         dg.addColorStop(0,   'rgba(255,230,120,1)');
@@ -2386,7 +2380,7 @@
           function syncPeriod() {
             const p = getTimePeriod();
             html.setAttribute('data-period', p);
-            if (window._bgEffect) window._bgEffect.setMode(p === 'midnight' ? 'shooting-stars' : p === 'day' ? 'clouds' : 'none');
+            if (window._bgEffect) window._bgEffect.setMode(p === 'midnight' ? 'shooting-stars' : p === 'day' ? 'clouds' : p === 'sunset' ? 'particles' : 'none');
           }
           syncPeriod();
           _timerId = setInterval(syncPeriod, 60000);
