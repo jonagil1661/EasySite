@@ -1,0 +1,2388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title id="page-title">Portfolio</title>
+  <script>
+    (function() {
+      var t = localStorage.getItem('portfolio-theme') || 'auto';
+      if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+  <style>
+    /* ── Reset & base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy:       #003057;
+      --gold:       #B3A369;
+      --gold-light: #d4c97a;
+      --white:      #ffffff;
+      --header-h:   64px;
+      --section-pad: 80px;
+      /* theme tokens — overridden per color scheme below */
+      --bg:          #000000;
+      --text:        #ffffff;
+      --text-muted:  rgba(255,255,255,0.72);
+      --text-dim:    rgba(255,255,255,0.45);
+      --off-white:   #1e1e1e;
+      --gray:        #9ca3af;
+      --border:      rgba(255,255,255,0.15);
+      --card-bg:     rgba(210,214,220,0.85);
+      --card-text:   #222222;
+      --glass-bg:    rgba(255,255,255,0.06);
+      --glass-border: rgba(255,255,255,0.12);
+      --glass-text:  #ffffff;
+      --nav-bg:      rgba(0,0,0,0.60);
+      --nav-text:    rgba(255,255,255,0.78);
+      --footer-bg:   rgba(0,0,0,0.5);
+      --skill-bg:    rgba(255,255,255,0.12);
+      --skill-border: rgba(255,255,255,0.25);
+      --skill-text:  #ffffff;
+      --bottom-nav-bg: rgba(20,20,28,0.92);
+      /* chip/tag colors — always light since cards are always white */
+      --chip-bg:     #f0f2f5;
+      --chip-border: #dde1e7;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg:          #f3f4f6;
+        --text:        #111827;
+        --text-muted:  rgba(0,0,0,0.65);
+        --text-dim:    rgba(0,0,0,0.4);
+        --off-white:   #ffffff;
+        --gray:        #6b7280;
+        --border:      #d1d5db;
+        --card-bg:     rgba(210,214,220,0.85);
+        --card-text:   #222222;
+        --glass-bg:    rgba(0,0,0,0.04);
+        --glass-border: rgba(0,0,0,0.1);
+        --glass-text:  #111827;
+        --nav-bg:      rgba(255,255,255,0.68);
+        --nav-text:    rgba(0,30,60,0.75);
+        --footer-bg:   rgba(240,241,243,0.9);
+        --skill-bg:    rgba(0,48,87,0.08);
+        --skill-border: rgba(0,48,87,0.2);
+        --skill-text:  #003057;
+        --bottom-nav-bg: rgba(255,255,255,0.94);
+      }
+    }
+    /* ── Time mode — base (beats prefers-color-scheme) ── */
+    html[data-theme="time"] {
+      --bg:#000000; --text:#ffffff; --text-muted:rgba(255,255,255,0.72);
+      --text-dim:rgba(255,255,255,0.45); --off-white:#1e1e1e; --gray:#9ca3af;
+      --border:rgba(255,255,255,0.15); --card-bg:rgba(210,214,220,0.85); --card-text:#222222;
+      --glass-bg:rgba(255,255,255,0.06); --glass-border:rgba(255,255,255,0.12);
+      --glass-text:#ffffff; --nav-bg:rgba(0,0,0,0.60); --nav-text:rgba(255,255,255,0.78);
+      --footer-bg:rgba(0,0,0,0.5); --skill-bg:rgba(255,255,255,0.12);
+      --skill-border:rgba(255,255,255,0.25); --skill-text:#ffffff;
+      --bottom-nav-bg:rgba(20,20,28,0.92);
+    }
+    /* Dawn 5–8am: deep purple → pink horizon */
+    html[data-theme="time"][data-period="dawn"] {
+      --bg:transparent; --border:rgba(200,150,220,0.2);
+      --glass-bg:rgba(200,150,220,0.07); --glass-border:rgba(200,150,220,0.14);
+      --nav-bg:rgba(10,8,22,0.60);
+    }
+    html[data-theme="time"][data-period="dawn"] body {
+      background: linear-gradient(160deg,#0d0522 0%,#2d1154 40%,#7a2575 70%,#c96442 100%) fixed;
+    }
+    /* Day 8am–5pm: rich sky blue */
+    html[data-theme="time"][data-period="day"] {
+      --bg:transparent; --text:#ffffff; --text-muted:rgba(255,255,255,0.78);
+      --text-dim:rgba(255,255,255,0.45); --off-white:#1e2a3a; --gray:#93c5fd;
+      --border:rgba(100,180,255,0.25); --glass-bg:rgba(255,255,255,0.18); --glass-border:rgba(255,255,255,0.32);
+      --glass-text:#ffffff; --nav-bg:rgba(0,40,90,0.60); --nav-text:rgba(200,230,255,0.85);
+      --skill-bg:rgba(255,255,255,0.22); --skill-border:rgba(255,255,255,0.4); --skill-text:#ffffff;
+      --bottom-nav-bg:rgba(0,40,80,0.92);
+    }
+    html[data-theme="time"][data-period="day"] body {
+      background: linear-gradient(160deg,#003a72 0%,#0077b6 40%,#1a9abf 70%,#60c6e0 100%) fixed;
+    }
+    /* Sunset 5–8pm: burnt orange → deep purple */
+    html[data-theme="time"][data-period="sunset"] {
+      --bg:transparent; --border:rgba(255,100,40,0.2);
+      --glass-bg:rgba(255,80,20,0.07); --glass-border:rgba(255,100,40,0.15);
+      --nav-bg:rgba(18,5,8,0.60);
+    }
+    html[data-theme="time"][data-period="sunset"] body {
+      background: linear-gradient(160deg,#080010 0%,#4a0a2a 25%,#b83232 55%,#e05c1c 78%,#f5a623 100%) fixed;
+    }
+    /* Midnight 8pm–5am: deep space, shooting stars */
+    html[data-theme="time"][data-period="midnight"] body {
+      background: linear-gradient(160deg,#000005 0%,#001030 55%,#001845 100%) fixed;
+    }
+    /* Force dark/light when user overrides system preference */
+    html[data-theme="dark"] {
+      --bg:          #000000;
+      --text:        #ffffff;
+      --text-muted:  rgba(255,255,255,0.72);
+      --text-dim:    rgba(255,255,255,0.45);
+      --off-white:   #1e1e1e;
+      --gray:        #9ca3af;
+      --border:      rgba(255,255,255,0.15);
+      --card-bg:     rgba(210,214,220,0.85);
+      --card-text:   #222222;
+      --glass-bg:    rgba(255,255,255,0.06);
+      --glass-border: rgba(255,255,255,0.12);
+      --glass-text:  #ffffff;
+      --nav-bg:      rgba(0,0,0,0.60);
+      --nav-text:    rgba(255,255,255,0.78);
+      --footer-bg:   rgba(0,0,0,0.5);
+      --skill-bg:    rgba(255,255,255,0.12);
+      --skill-border: rgba(255,255,255,0.25);
+      --skill-text:  #ffffff;
+      --bottom-nav-bg: rgba(20,20,28,0.92);
+    }
+    html[data-theme="light"] {
+      --bg:          #f3f4f6;
+      --text:        #111827;
+      --text-muted:  rgba(0,0,0,0.65);
+      --text-dim:    rgba(0,0,0,0.4);
+      --off-white:   #ffffff;
+      --gray:        #6b7280;
+      --border:      #d1d5db;
+      --card-bg:     rgba(210,214,220,0.85);
+      --card-text:   #222222;
+      --glass-bg:    rgba(0,0,0,0.04);
+      --glass-border: rgba(0,0,0,0.1);
+      --glass-text:  #111827;
+      --nav-bg:      rgba(255,255,255,0.68);
+      --nav-text:    rgba(0,30,60,0.75);
+      --footer-bg:   rgba(240,241,243,0.9);
+      --skill-bg:    rgba(0,48,87,0.08);
+      --skill-border: rgba(0,48,87,0.2);
+      --skill-text:  #003057;
+      --bottom-nav-bg: rgba(255,255,255,0.94);
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: var(--text); background: var(--bg); overflow-x: hidden; }
+    * { min-width: 0; }
+    section {
+      position: relative;
+      z-index: 1;
+      transform-origin: 50% 0%;
+      transition: transform 0.04s linear, opacity 0.04s linear;
+    }
+
+    /* ── Header ── */
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--header-h);
+      background: var(--nav-bg);
+      backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 24px;
+      padding: 0 40px;
+      z-index: 1000;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+    }
+    .header-logo {
+      color: var(--text);
+      font-size: 1.1rem;
+      font-weight: 700;
+      text-decoration: none;
+      letter-spacing: 0.02em;
+    }
+    .header-logo span { color: var(--gold); }
+    nav {
+      display: flex;
+      gap: 6px;
+      flex: 1;
+      min-width: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    nav::-webkit-scrollbar { display: none; }
+    nav a {
+      color: var(--nav-text);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: 20px;
+      transition: background 0.2s, color 0.2s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    nav a:hover { color: var(--text); background: var(--glass-bg); }
+    nav a.active { color: var(--navy); background: var(--gold); font-weight: 600; }
+    .theme-toggle {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 3px;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+    .theme-toggle button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 5px 10px;
+      border-radius: 16px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--nav-text);
+      transition: background 0.18s, color 0.18s;
+      white-space: nowrap;
+      line-height: 1;
+    }
+    .theme-toggle button.active {
+      background: var(--gold);
+      color: var(--navy);
+      font-weight: 700;
+    }
+    .theme-toggle button:hover:not(.active) { background: var(--glass-bg); color: var(--text); }
+
+    /* ── Sections shared ── */
+    section {
+      min-height: 100vh;
+      padding: calc(var(--header-h) + var(--section-pad)) 60px var(--section-pad);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    .section-inner {
+      width: 100%;
+      max-width: 900px;
+    }
+    section:nth-child(even) { background: transparent; }
+    .section-label { display: none; }
+    h2.section-title {
+      font-size: 2rem;
+      color: var(--text);
+      margin-bottom: 32px;
+      position: relative;
+      padding-bottom: 14px;
+    }
+    h2.section-title::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 48px; height: 3px;
+      background: var(--gold);
+      border-radius: 2px;
+    }
+
+    /* ── § HOME ── */
+    #home {
+      background: transparent !important;
+      color: var(--text);
+      position: relative;
+      overflow: hidden;
+    }
+    #home::before {
+      content: '';
+      position: absolute;
+      top: -120px; right: -120px;
+      width: 480px; height: 480px;
+      background: radial-gradient(circle, rgba(179,163,105,0.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    #home .section-inner {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .home-inner {
+      max-width: 700px;
+      position: relative;
+      z-index: 1;
+    }
+    .home-eyebrow {
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 16px;
+    }
+    #home h1 {
+      font-size: clamp(2.4rem, 5vw, 3.8rem);
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 20px;
+      color: var(--text);
+    }
+    #home h1 span { color: var(--gold); }
+    .home-tagline {
+      font-size: 1.1rem;
+      line-height: 1.65;
+      color: var(--text-muted);
+      margin-bottom: 36px;
+      max-width: 560px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .home-ctas { display: flex; flex-wrap: wrap; gap: 14px; }
+    .btn {
+      display: inline-block;
+      padding: 12px 26px;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: opacity 0.18s, transform 0.15s, background 0.18s;
+      cursor: pointer;
+    }
+    .btn:hover { opacity: 0.9; transform: translateY(-2px); text-decoration: none; }
+    .btn-gold  { background: var(--gold); color: var(--navy); }
+    .btn-outline { background: transparent; color: var(--text); border: 2px solid var(--text-muted); }
+    .btn-outline:hover { border-color: var(--text); }
+    .home-scroll-hint {
+      position: absolute;
+      bottom: 36px; left: 50%;
+      transform: translateX(-50%);
+      display: flex; align-items: center; gap: 10px;
+      color: var(--text-dim);
+      font-size: 0.8rem;
+    }
+    .scroll-arrow {
+      width: 20px; height: 20px;
+      border-right: 2px solid var(--text-dim);
+      border-bottom: 2px solid var(--text-dim);
+      transform: rotate(45deg);
+      animation: bounce 1.6s infinite;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: rotate(45deg) translateY(0); }
+      50% { transform: rotate(45deg) translateY(5px); }
+    }
+
+    /* ── § ABOUT ── */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 48px;
+      align-items: start;
+      max-width: 900px;
+    }
+    .about-photo-col {
+      min-width: 0;
+      max-width: 240px;
+    }
+    .about-photo {
+      width: 100%;
+      height: auto;
+      border-radius: 10px;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.13);
+      display: block;
+    }
+    .about-links {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .about-links a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px; height: 40px;
+      color: var(--navy);
+      text-decoration: none;
+      border: 1.5px solid var(--chip-border);
+      border-radius: 50%;
+      transition: background 0.18s, color 0.18s, border-color 0.18s;
+      background: var(--card-bg);
+    }
+    .about-links a:hover { background: var(--navy); color: #fff; border-color: var(--navy); }
+    .about-links svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .about-bio { font-size: 1rem; line-height: 1.75; color: var(--text-muted); margin-bottom: 28px; }
+
+    /* Skills */
+    .skills-section { margin-bottom: 28px; }
+    .skills-section h3 { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 10px; }
+    .skill-group { display: flex; flex-wrap: wrap; gap: 8px; }
+    .skill-tag {
+      background: var(--skill-bg);
+      border: 1.5px solid var(--skill-border);
+      color: var(--skill-text);
+      font-size: 0.8rem;
+      font-weight: 500;
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+
+    /* Hobbies */
+    .hobbies-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 16px; }
+    .hobby-block h3 { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .hobby-block p  { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 12px; }
+
+    /* Carousel */
+    .carousel-wrap {
+      position: relative;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+      background: #f0f0f0;
+    }
+    .carousel-track { position: relative; }
+    .carousel-track img {
+      display: none;
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+    }
+    .carousel-track img.active { display: block; }
+    .carousel-btn {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      background: rgba(0,0,0,0.55); color: #fff; border: none;
+      width: 32px; height: 32px; border-radius: 50%; font-size: 16px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s; z-index: 5;
+    }
+    .carousel-btn:hover { background: rgba(0,0,0,0.8); }
+    .carousel-btn.prev { left: 8px; }
+    .carousel-btn.next { right: 8px; }
+    .carousel-dots { text-align: center; padding: 8px 0 4px; }
+    .carousel-dots span {
+      display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+      background: var(--border); margin: 0 3px; cursor: pointer; transition: background 0.2s;
+    }
+    .carousel-dots span.on { background: var(--gold); }
+    .carousel-caption { text-align: center; font-size: 0.78rem; color: #777; padding-bottom: 6px; }
+
+    /* Dark text inside all light-bg cards — overrides any white --text from theme */
+    .edu-card, .exp-card, .proj-card, .note-card, .faq-card,
+    .edu-card *, .exp-card *, .proj-card *, .note-card *, .faq-card * {
+      --text: #222222;
+      --text-muted: rgba(0,0,0,0.6);
+      --text-dim: rgba(0,0,0,0.38);
+    }
+    .edu-card, .exp-card, .proj-card { color: #222; }
+
+    /* ── § EDUCATION ── */
+    .edu-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-top: 4px solid var(--gold);
+      border-radius: 10px;
+      padding: 32px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    .edu-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+    .edu-logo {
+      width: 56px;
+      height: 56px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+    .edu-school {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 4px;
+    }
+    .edu-degree {
+      font-size: 0.95rem;
+      color: #333;
+      margin-bottom: 4px;
+    }
+    .edu-meta {
+      font-size: 0.85rem;
+      color: #666;
+    }
+    .edu-courses-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #888;
+      margin-bottom: 12px;
+    }
+    .course-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 8px;
+    }
+    .course-grid span {
+      background: var(--chip-bg);
+      border: 1px solid var(--chip-border);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 0.85rem;
+      color: #333;
+    }
+
+    /* ── § EXPERIENCE ── */
+    .exp-list { display: flex; flex-direction: column; gap: 20px; }
+    .exp-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--gold);
+      border-radius: 8px;
+      padding: 24px 28px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .exp-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .exp-role { font-size: 1rem; font-weight: 700; color: var(--navy); margin-bottom: 3px; }
+    .exp-org  { font-size: 0.88rem; color: #666; }
+    .exp-date { font-size: 0.8rem; color: #777; white-space: nowrap; font-style: italic; padding-top: 2px; }
+    .exp-bullets { padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
+    .exp-bullets li { font-size: 0.9rem; line-height: 1.6; color: #333; }
+    .exp-link { display: inline-block; margin-top: 12px; font-size: 0.82rem; font-weight: 600; color: var(--navy); text-decoration: none; }
+    .exp-link:hover { color: var(--gold); }
+
+    /* ── Mobile bottom nav ── */
+    .bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--bottom-nav-bg);
+      backdrop-filter: blur(10px);
+      border-radius: 40px;
+      padding: 10px 20px;
+      z-index: 1100;
+      gap: 4px;
+    }
+    .bottom-nav a {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      padding: 6px 10px;
+      border-radius: 28px;
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 0.6rem;
+      transition: background 0.2s, color 0.2s;
+    }
+    .bottom-nav a .bn-icon { font-size: 1.2rem; line-height: 1; }
+    .bottom-nav a:hover { color: var(--text); }
+    .bottom-nav a.active { background: rgba(179,163,105,0.25); color: var(--gold); }
+
+    /* ── Footer ── */
+    footer {
+      background: var(--nav-bg);
+      backdrop-filter: blur(12px);
+      padding: 48px 24px 32px;
+      text-align: center;
+    }
+    .footer-icons {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+    .footer-icons a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 52px; height: 52px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      color: var(--text);
+      transition: transform 0.15s, background 0.15s;
+      text-decoration: none;
+    }
+    .footer-icons a:hover { transform: translateY(-3px); background: var(--gold); color: var(--navy); }
+    .footer-icons svg { width: 22px; height: 22px; }
+    .footer-divider {
+      width: 100%; height: 1px;
+      background: var(--glass-border);
+      margin-bottom: 20px;
+    }
+    .footer-copy {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin: 0;
+    }
+
+    @media (max-width: 640px) {
+      nav { display: none; }
+      .bottom-nav { display: flex; }
+      section { padding-bottom: calc(var(--section-pad) + 80px); }
+    }
+
+    /* ── § PROJECTS ── */
+    .proj-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .proj-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-top: 4px solid var(--gold);
+      border-radius: 8px;
+      padding: 22px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .proj-card { cursor: pointer; }
+    .proj-card:hover { box-shadow: 0 16px 40px rgba(0,0,0,0.18); transform: translateY(-6px) scale(1.03); }
+
+    /* Project modal */
+    #proj-modal {
+      display: none; position: fixed; inset: 0; z-index: 1000;
+      background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    #proj-modal.open { display: flex; }
+    #proj-modal-box {
+      background: var(--card-bg); border-radius: 16px; max-width: 720px; width: 100%;
+      max-height: 90vh; overflow-y: auto; overflow-x: hidden; position: relative;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.35);
+      animation: modalIn 0.22s ease;
+    }
+    @keyframes modalIn { from { opacity:0; transform:scale(0.95) translateY(12px); } to { opacity:1; transform:none; } }
+    #proj-modal-close {
+      position: sticky; top: 0; float: right; margin: 14px 14px 0 0;
+      background: rgba(0,0,0,0.07); border: none; border-radius: 50%; width: 32px; height: 32px;
+      cursor: pointer; font-size: 1.1rem; line-height: 32px; text-align: center; color: #333;
+      z-index: 2;
+    }
+    #proj-modal-close:hover { background: rgba(0,0,0,0.14); }
+    #proj-modal-body { padding: 24px 28px 28px; }
+    #proj-modal-body .carousel-wrap { border-radius: 10px; overflow: hidden; margin-bottom: 16px; }
+    #proj-modal-body .carousel-wrap img { max-height: 380px; width: 100%; object-fit: contain; background: #f0f0f0; }
+    #proj-modal-title { font-size: 1.4rem; font-weight: 800; color: var(--navy); margin-bottom: 4px; }
+    #proj-modal-date { font-size: 0.82rem; color: #777; font-style: italic; margin-bottom: 12px; }
+    #proj-modal-desc { font-size: 0.95rem; line-height: 1.7; color: #333; margin-bottom: 14px; }
+    #proj-modal-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 16px; }
+    #proj-modal-tags span { background: var(--chip-bg); border: 1px solid var(--chip-border); border-radius: 20px; padding: 4px 12px; font-size: 0.78rem; color: var(--navy); }
+    #proj-modal-links { display: flex; gap: 12px; }
+    #proj-modal-links a { display: flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; border: 1.5px solid var(--navy); color: var(--navy); font-size: 0.85rem; font-weight: 600; text-decoration: none; transition: background 0.15s; }
+    #proj-modal-links a:hover { background: var(--navy); color: #fff; }
+    #proj-modal-links a svg { width: 16px; height: 16px; }
+    #blog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+    .blog-card {
+      background: var(--glass-bg); border: 1px solid var(--glass-border);
+      border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 10px;
+      transition: transform 0.18s, background 0.18s;
+    }
+    .blog-card:hover { transform: translateY(-3px); background: var(--glass-bg); }
+    .blog-card a { text-decoration: none; color: inherit; }
+    .blog-card-title { font-size: 1.05rem; font-weight: 700; color: var(--glass-text); line-height: 1.35; }
+    .blog-card-date { font-size: 0.78rem; opacity: 0.55; }
+    .blog-card-summary { font-size: 0.88rem; line-height: 1.6; opacity: 0.8; flex: 1; }
+    .blog-card-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+    .blog-card-tags span {
+      background: rgba(179,163,105,0.18); border: 1px solid rgba(179,163,105,0.35);
+      border-radius: 20px; padding: 3px 10px; font-size: 0.73rem; color: var(--text-muted);
+    }
+    .blog-card-link { font-size: 0.82rem; color: rgba(179,163,105,0.9); font-weight: 600; margin-top: auto; }
+
+    /* Certifications */
+    #cert-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+    .cert-card {
+      background: var(--glass-bg); border: 1px solid var(--glass-border);
+      border-radius: 14px; padding: 20px 22px; display: flex; flex-direction: column; gap: 6px;
+      transition: transform 0.18s, background 0.18s;
+    }
+    .cert-card:hover { transform: translateY(-3px); background: var(--glass-bg); }
+    .cert-name { font-size: 1rem; font-weight: 700; color: var(--glass-text); }
+    .cert-issuer { font-size: 0.83rem; opacity: 0.65; }
+    .cert-dates { font-size: 0.78rem; opacity: 0.5; }
+    .cert-link { font-size: 0.8rem; color: rgba(179,163,105,0.9); font-weight: 600; margin-top: 4px; }
+
+    /* Awards */
+    #awards-grid { display: flex; flex-direction: column; gap: 14px; max-width: 760px; margin: 0 auto; }
+    .award-card {
+      background: var(--glass-bg); border: 1px solid var(--glass-border);
+      border-radius: 14px; padding: 20px 24px; display: flex; gap: 18px; align-items: flex-start;
+      transition: background 0.18s;
+    }
+    .award-card:hover { background: var(--glass-bg); }
+    .award-icon { flex-shrink: 0; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: rgba(179,163,105,0.18); border-radius: 50%; }
+    .award-body { flex: 1; }
+    .award-title { font-size: 1rem; font-weight: 700; color: var(--glass-text); margin-bottom: 2px; }
+    .award-meta { font-size: 0.8rem; opacity: 0.55; margin-bottom: 6px; }
+    .award-desc { font-size: 0.87rem; line-height: 1.6; opacity: 0.8; }
+    .award-link { font-size: 0.8rem; color: rgba(179,163,105,0.9); font-weight: 600; margin-top: 6px; display: inline-block; }
+
+    /* Research */
+    #research-grid { display: flex; flex-direction: column; gap: 20px; }
+    .research-card {
+      background: var(--glass-bg); border: 1px solid var(--glass-border);
+      border-left: 3px solid rgba(179,163,105,0.6);
+      border-radius: 14px; padding: 24px 26px; display: flex; flex-direction: column; gap: 8px;
+      transition: background 0.18s;
+    }
+    .research-card:hover { background: var(--glass-bg); }
+    .research-title { font-size: 1.05rem; font-weight: 700; color: var(--glass-text); line-height: 1.35; }
+    .research-role-line { font-size: 0.83rem; opacity: 0.65; }
+    .research-abstract { font-size: 0.88rem; line-height: 1.6; opacity: 0.8; }
+    .research-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .research-tags span { background: rgba(179,163,105,0.18); border: 1px solid rgba(179,163,105,0.35); border-radius: 20px; padding: 3px 10px; font-size: 0.73rem; color: var(--text-muted); }
+    .research-link { font-size: 0.82rem; color: rgba(179,163,105,0.9); font-weight: 600; margin-top: 4px; }
+
+    /* Notes grid */
+    #notes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
+    .note-card {
+      background: var(--card-bg); border: 1px solid var(--border); border-top: 4px solid var(--gold);
+      border-radius: 8px; padding: 22px 24px; display: flex; flex-direction: column; gap: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05); cursor: pointer;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .note-card:hover { box-shadow: 0 16px 40px rgba(0,0,0,0.18); transform: translateY(-6px) scale(1.03); }
+    .note-card-icon { width: 40px; height: 40px; background: rgba(0,48,87,0.08); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .note-card-title { font-size: 0.97rem; font-weight: 700; color: var(--navy); line-height: 1.3; }
+    .note-card-course { font-size: 0.78rem; color: #888; font-style: italic; }
+    .note-card-desc { font-size: 0.85rem; line-height: 1.6; color: #444; flex: 1; }
+    .note-card-cta { font-size: 0.8rem; font-weight: 600; color: var(--navy); opacity: 0.6; margin-top: auto; }
+
+    /* Trips map */
+    #trips-map { height: 380px; border-radius: 14px; overflow: hidden; margin-bottom: 40px; border: 1px solid var(--glass-border); }
+    .trips-map-pin { background: var(--gold); border: 2px solid #fff; border-radius: 50%; width: 12px; height: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
+    .leaflet-popup-content-wrapper { border-radius: 8px; font-family: inherit; }
+    .leaflet-popup-content { font-size: 0.85rem; font-weight: 600; color: var(--navy); margin: 8px 12px; }
+
+    /* Gear */
+    #gear-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap: 16px; }
+    .gear-card {
+      background: var(--glass-bg); border: 1px solid var(--glass-border);
+      border-radius: 14px; padding: 20px 22px; display: flex; flex-direction: column; gap: 8px;
+      transition: background 0.18s, transform 0.18s;
+    }
+    .gear-card:hover { background: var(--glass-bg); transform: translateY(-2px); }
+    .gear-card-category { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(179,163,105,0.8); }
+    .gear-card-name { font-size: 1rem; font-weight: 700; color: var(--glass-text); }
+    .gear-card-desc { font-size: 0.85rem; line-height: 1.6; opacity: 0.75; flex: 1; }
+    .gear-card-link { font-size: 0.8rem; color: rgba(179,163,105,0.9); font-weight: 600; margin-top: 4px; }
+    .gear-section-label { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.45; margin: 28px 0 12px; }
+    .gear-section-label:first-child { margin-top: 0; }
+
+    /* Spotify */
+    #spotify-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 14px; }
+    .spotify-card {
+      background: rgba(255,255,255,0.06); border: 1px solid var(--glass-border);
+      border-radius: 12px; overflow: hidden; display: flex; flex-direction: column;
+      transition: background 0.18s, transform 0.18s; text-decoration: none;
+    }
+    .spotify-card:hover { background: var(--glass-bg); transform: translateY(-3px); }
+    .spotify-card img { width: 100%; aspect-ratio: 1; object-fit: cover; }
+    .spotify-card-body { padding: 12px 14px; }
+    .spotify-card-track { font-size: 0.88rem; font-weight: 700; color: var(--glass-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .spotify-card-artist { font-size: 0.78rem; opacity: 0.6; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .spotify-updated { font-size: 0.75rem; opacity: 0.4; text-align: center; margin-top: 16px; }
+    .spotify-badge { display: inline-flex; align-items: center; gap: 6px; background: #1DB954; color: #fff; border-radius: 20px; padding: 4px 12px; font-size: 0.78rem; font-weight: 700; margin-bottom: 24px; }
+
+    .faq-card { background: var(--card-bg); border-radius: 12px; overflow: hidden; color: var(--card-text); }
+    .faq-card-inner { padding: 0; }
+    .faq-toggle {
+      width: 100%; display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 20px; background: none; border: none; cursor: pointer;
+      font-size: 0.95rem; font-weight: 600; color: var(--card-text); text-align: left; gap: 12px;
+    }
+    .faq-toggle:hover { background: rgba(0,0,0,0.03); }
+    .faq-icon { flex-shrink: 0; transition: transform 0.2s; }
+    .faq-answer { padding: 0 20px 18px; font-size: 0.9rem; color: #444; line-height: 1.6; }
+    .proj-name { font-size: 1rem; font-weight: 700; color: var(--navy); margin-bottom: 2px; }
+    .proj-date { font-size: 0.78rem; color: #777; font-style: italic; }
+    .proj-desc { font-size: 0.87rem; line-height: 1.6; color: #444; flex: 1; }
+    .proj-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .proj-tags span {
+      background: var(--chip-bg);
+      border: 1px solid var(--chip-border);
+      border-radius: 20px;
+      padding: 3px 10px;
+      font-size: 0.75rem;
+      color: var(--navy);
+    }
+    .proj-links { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+    .proj-links a {
+      display: flex; align-items: center; justify-content: center;
+      width: 34px; height: 34px;
+      color: var(--navy);
+      text-decoration: none;
+      border: 1.5px solid var(--chip-border);
+      border-radius: 8px;
+      background: var(--card-bg);
+      transition: background 0.18s, color 0.18s, border-color 0.18s;
+    }
+    .proj-links a:hover { background: var(--navy); color: #fff; border-color: var(--navy); }
+    .proj-links svg { width: 17px; height: 17px; flex-shrink: 0; }
+
+    /* ── § RESUME ── */
+    .resume-layout {
+      display: block;
+    }
+    .resume-pdf-wrap {
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+    }
+    .resume-pdf-wrap iframe {
+      display: block;
+      width: 100%;
+      border: none;
+    }
+    .resume-pdf-col .pdf-fallback {
+      display: none;
+      text-align: center;
+      padding: 60px 20px;
+      background: var(--chip-bg);
+      border-radius: 10px;
+      border: 2px dashed var(--chip-border);
+    }
+    .resume-info-col { display: flex; flex-direction: column; gap: 28px; }
+    .resume-dl-btn {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--navy); color: #fff;
+      padding: 14px 28px; border-radius: 8px;
+      text-decoration: none; font-weight: 700; font-size: 1rem;
+      transition: background 0.2s; width: fit-content;
+    }
+    .resume-dl-btn:hover { background: var(--gold); color: var(--navy); }
+    .resume-dl-btn svg { flex-shrink: 0; }
+    .resume-highlight { background: var(--glass-bg); border-radius: 10px; padding: 20px 24px; }
+    .resume-highlight h4 {
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--gold); margin-bottom: 12px;
+    }
+    .resume-highlight ul {
+      list-style: none; padding: 0; margin: 0;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .resume-highlight li {
+      font-size: 0.88rem; color: var(--text-muted);
+      display: flex; align-items: flex-start; gap: 8px;
+    }
+    .resume-highlight li::before {
+      content: '▸'; color: var(--gold); flex-shrink: 0; margin-top: 1px;
+    }
+    .resume-skills-grid {
+      display: flex; flex-wrap: wrap; gap: 8px;
+    }
+    .resume-skills-grid span {
+      background: var(--chip-bg); border: 1px solid var(--chip-border);
+      padding: 4px 12px; border-radius: 20px;
+      font-size: 0.8rem; color: var(--navy);
+    }
+    @media (max-width: 760px) {
+      .resume-layout { grid-template-columns: 1fr; }
+      .resume-pdf-col iframe { height: 380px; }
+    }
+
+    @media (max-width: 760px) {
+      .about-grid { grid-template-columns: 1fr; }
+      .hobbies-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── Mobile ── */
+    @media (max-width: 640px) {
+      header { padding: 0 20px; }
+      .header-logo { display: none; }
+      nav a { padding: 6px 10px; font-size: 0.8rem; }
+      section { padding: calc(var(--header-h) + 40px) 24px 40px; }
+      .home-scroll-hint { left: 24px; }
+    }
+  </style>
+  <!-- Leaflet for trips map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+
+  <!-- ── HEADER ── -->
+  <header>
+    <a class="header-logo" href="#home" id="header-logo-name"></a>
+    <nav>
+      <a href="#about">About Me</a>
+      <a href="#education">Education</a>
+      <a href="#experience">Experience</a>
+      <a href="#projects">Projects</a>
+      <a href="#resume">Resume</a>
+      <a href="#cv">CV</a>
+      <a href="#blog">Blog</a>
+      <a href="#certifications">Certifications</a>
+      <a href="#awards">Awards</a>
+      <a href="#research">Research</a>
+      <a href="#trips">Trips</a>
+      <a href="#gear">Gear</a>
+      <a href="#spotify">Spotify</a>
+      <a href="#notes">My Notes</a>
+      <a href="#faq">FAQ</a>
+      <a href="#hobbies">Hobbies</a>
+    </nav>
+    <div class="theme-toggle" id="themeToggle">
+      <button data-mode="auto" title="Auto (system)">Auto</button>
+      <button data-mode="light" title="Light mode">☀️</button>
+      <button data-mode="dark" title="Dark mode">🌙</button>
+      <button data-mode="time" title="Time of day">🕐</button>
+    </div>
+  </header>
+
+  <!-- ── § HOME ── -->
+  <section id="home">
+    <div class="section-inner">
+    <div class="home-inner">
+      <p class="home-eyebrow" id="hero-eyebrow"></p>
+      <h1>Hi, I'm <span id="hero-name"></span></h1>
+      <p class="home-tagline" id="hero-tagline"></p>
+    </div>
+    </div><!-- /home-inner -->
+    </div><!-- /section-inner -->
+    <div class="home-scroll-hint">
+      <div class="scroll-arrow"></div>
+      <span>Scroll to explore</span>
+    </div>
+  </section>
+
+  <!-- ── § ABOUT ── -->
+  <section id="about">
+    <div class="section-inner">
+    <p class="section-label">01 — About</p>
+    <h2 class="section-title">About Me</h2>
+
+    <div class="about-grid">
+      <div class="about-photo-col">
+        <img class="about-photo" id="about-photo" src="" alt="Profile photo" style="display:none;" />
+        <div class="about-links" id="about-social-links"></div>
+      </div>
+      <div>
+        <p class="about-bio" id="about-bio-text"></p>
+      </div>
+    </div>
+    </div><!-- /section-inner -->
+  </section>
+
+  <!-- ── § EDUCATION ── -->
+  <section id="education">
+    <div class="section-inner">
+      <p class="section-label">02 — Education</p>
+      <h2 class="section-title">Education</h2>
+      <div id="education-list"></div>
+    </div>
+  </section>
+
+  <!-- ── § EXPERIENCE ── -->
+  <section id="experience">
+    <div class="section-inner">
+      <p class="section-label">03 — Experience</p>
+      <h2 class="section-title">Experience</h2>
+      <div class="exp-list" id="experience-list"></div>
+    </div>
+  </section>
+
+  <!-- ── § PROJECTS ── -->
+  <section id="projects">
+    <div class="section-inner">
+      <p class="section-label">04 — Projects</p>
+      <h2 class="section-title">Projects</h2>
+
+      <div class="proj-grid" id="proj-grid"></div>
+    </div>
+  </section>
+
+  <!-- ── § TRIPS ── -->
+  <section id="trips">
+    <div class="section-inner">
+      <p class="section-label">— Trips</p>
+      <h2 class="section-title">Trips</h2>
+      <div id="trips-map"></div>
+      <div class="hobbies-grid" id="trips-grid"></div>
+    </div>
+  </section>
+
+  <!-- ── § FAQ ── -->
+  <section id="faq">
+    <div class="section-inner">
+      <p class="section-label">05 — FAQ</p>
+      <h2 class="section-title" id="faq-heading-display">Frequently Asked Questions</h2>
+      <p class="section-subtitle" id="faq-desc-display" style="max-width:600px;margin:0 auto 40px;text-align:center;opacity:0.85;line-height:1.6;"></p>
+      <div id="faq-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;"></div>
+    </div>
+  </section>
+
+  <!-- ── § HOBBIES ── -->
+  <section id="hobbies">
+    <div class="section-inner">
+      <p class="section-label">— Hobbies</p>
+      <h2 class="section-title">Hobbies</h2>
+      <div class="hobbies-grid" id="hobbies-grid"></div>
+    </div>
+  </section>
+
+  <!-- ── § BLOG ── -->
+  <section id="blog">
+    <div class="section-inner">
+      <p class="section-label">06 — Blog</p>
+      <h2 class="section-title" id="blog-heading-display">Writing</h2>
+      <p class="section-subtitle" id="blog-desc-display" style="max-width:600px;margin:0 auto 40px;text-align:center;opacity:0.85;line-height:1.6;"></p>
+      <div id="blog-grid"></div>
+    </div>
+  </section>
+
+  <!-- ── § CERTIFICATIONS ── -->
+  <section id="certifications">
+    <div class="section-inner">
+      <p class="section-label">Certifications</p>
+      <h2 class="section-title" id="cert-heading-display">Certifications</h2>
+      <div id="cert-grid"></div>
+    </div>
+  </section>
+
+  <!-- ── § AWARDS ── -->
+  <section id="awards">
+    <div class="section-inner">
+      <p class="section-label">Awards</p>
+      <h2 class="section-title" id="awards-heading-display">Awards &amp; Honors</h2>
+      <div id="awards-grid"></div>
+    </div>
+  </section>
+
+  <!-- ── § RESEARCH ── -->
+  <section id="research">
+    <div class="section-inner">
+      <p class="section-label">Research</p>
+      <h2 class="section-title" id="research-heading-display">Research</h2>
+      <p class="section-subtitle" id="research-desc-display" style="max-width:600px;margin:0 auto 40px;text-align:center;opacity:0.85;line-height:1.6;"></p>
+      <div id="research-grid"></div>
+    </div>
+  </section>
+
+  <!-- ── § RESUME ── -->
+  <section id="resume">
+    <div class="section-inner">
+      <p class="section-label">05 — Resume</p>
+      <h2 class="section-title">Resume</h2>
+
+      <div class="resume-layout">
+        <!-- PDF embed -->
+        <div class="resume-pdf-col">
+          <div class="resume-pdf-wrap">
+            <iframe src="assets/files/Resume_2025.pdf#view=FitH" title="Resume"></iframe>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── § CV ── -->
+  <section id="cv">
+    <div class="section-inner">
+      <p class="section-label">— CV</p>
+      <h2 class="section-title">Curriculum Vitae</h2>
+      <div class="resume-layout">
+        <div class="resume-pdf-col">
+          <div class="resume-pdf-wrap" id="cv-pdf-wrap">
+            <p style="color:var(--text-dim);text-align:center;padding:40px 0;">No CV uploaded yet.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── § MY NOTES ── -->
+  <section id="notes">
+    <div class="section-inner">
+      <p class="section-label">— My Notes</p>
+      <h2 class="section-title" id="notes-heading-display">My Notes</h2>
+      <p class="section-subtitle" id="notes-desc-display" style="max-width:600px;margin:0 auto 32px;text-align:center;opacity:0.85;line-height:1.6;"></p>
+      <div id="notes-grid"></div>
+    </div>
+  </section>
+
+  <!-- Notes PDF modal -->
+  <div id="notes-modal" role="dialog" aria-modal="true" style="display:none;position:fixed;inset:0;z-index:1001;background:rgba(0,0,0,0.8);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px;">
+    <div id="notes-modal-box" style="background:var(--card-bg);border-radius:16px;max-width:860px;width:100%;height:88vh;display:flex;flex-direction:column;box-shadow:0 24px 60px rgba(0,0,0,0.4);animation:modalIn 0.22s ease;overflow:hidden;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid var(--border);flex-shrink:0;">
+        <div>
+          <div id="notes-modal-title" style="font-size:1.1rem;font-weight:700;color:var(--navy);"></div>
+          <div id="notes-modal-course" style="font-size:0.82rem;color:var(--gray);margin-top:2px;"></div>
+        </div>
+        <button onclick="closeNotesModal()" style="background:rgba(0,0,0,0.07);border:none;border-radius:50%;width:32px;height:32px;cursor:pointer;font-size:1.1rem;color:#333;">✕</button>
+      </div>
+      <iframe id="notes-modal-iframe" src="" style="flex:1;border:none;width:100%;"></iframe>
+    </div>
+  </div>
+
+  <!-- ── § GEAR ── -->
+  <section id="gear">
+    <div class="section-inner">
+      <p class="section-label">— Gear</p>
+      <h2 class="section-title" id="gear-heading-display">My Setup</h2>
+      <p class="section-subtitle" id="gear-desc-display" style="max-width:600px;margin:0 auto 36px;text-align:center;opacity:0.85;line-height:1.6;"></p>
+      <div id="gear-grid"></div>
+    </div>
+  </section>
+
+  <!-- ── § SPOTIFY ── -->
+  <section id="spotify">
+    <div class="section-inner">
+      <p class="section-label">— Spotify</p>
+      <h2 class="section-title">Recently Played</h2>
+      <div style="text-align:center;">
+        <div class="spotify-badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+          Spotify
+        </div>
+      </div>
+      <div id="spotify-grid"></div>
+      <div class="spotify-updated" id="spotify-updated"></div>
+    </div>
+  </section>
+
+  <!-- ── Footer ── -->
+  <!-- Project modal -->
+  <div id="proj-modal" role="dialog" aria-modal="true">
+    <div id="proj-modal-box">
+      <button id="proj-modal-close" aria-label="Close">✕</button>
+      <div id="proj-modal-body"></div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-icons" id="footer-social-icons"></div>
+    <div class="footer-divider"></div>
+    <p class="footer-copy"><a href="admin.html" style="color:inherit;text-decoration:none;">© <span id="footer-year"></span> <span id="footer-name"></span>. All Rights Reserved.</a></p>
+    <p style="font-size:0.72rem;opacity:0.35;margin-top:6px;">Built with <a href="https://github.com/jonagil1661/easysite" target="_blank" style="color:inherit;text-decoration:underline;"> EasySite </a> by Jonathan Gil</p>
+  </footer>
+
+  <!-- ── Mobile bottom nav ── -->
+  <nav class="bottom-nav" id="bottomNav">
+    <a href="#home"       class="active"><span class="bn-icon">🏠</span><span>Home</span></a>
+    <a href="#about">            <span class="bn-icon">👤</span><span>About</span></a>
+    <a href="#education">        <span class="bn-icon">🎓</span><span>Education</span></a>
+    <a href="#experience">       <span class="bn-icon">💼</span><span>Experience</span></a>
+    <a href="#projects">         <span class="bn-icon">🛠</span><span>Projects</span></a>
+    <a href="#resume">           <span class="bn-icon">📄</span><span>Resume</span></a>
+    <a href="#cv">               <span class="bn-icon">📋</span><span>CV</span></a>
+    <a href="#blog">             <span class="bn-icon">✏️</span><span>Blog</span></a>
+    <a href="#certifications">   <span class="bn-icon">🏅</span><span>Certs</span></a>
+    <a href="#awards">           <span class="bn-icon">🏆</span><span>Awards</span></a>
+    <a href="#research">         <span class="bn-icon">🔬</span><span>Research</span></a>
+    <a href="#trips">            <span class="bn-icon">✈️</span><span>Trips</span></a>
+    <a href="#gear">             <span class="bn-icon">🖥️</span><span>Gear</span></a>
+    <a href="#spotify">          <span class="bn-icon">🎵</span><span>Spotify</span></a>
+    <a href="#notes">            <span class="bn-icon">📝</span><span>Notes</span></a>
+    <a href="#faq">              <span class="bn-icon">❓</span><span>FAQ</span></a>
+    <a href="#hobbies">          <span class="bn-icon">🎯</span><span>Hobbies</span></a>
+  </nav>
+
+  <!-- ── Carousel logic ── -->
+  <script>
+    const carousels = {};
+    function initCarousel(id, captions) {
+      const imgs = document.querySelectorAll(`#${id}-track img`);
+      carousels[id] = { idx: 0, total: imgs.length, captions };
+      imgs[0].classList.add('active');
+    }
+    function renderCarousel(id) {
+      const c = carousels[id];
+      document.querySelectorAll(`#${id}-track img`).forEach((img, i) => img.classList.toggle('active', i === c.idx));
+      document.querySelectorAll(`#${id}-dots span`).forEach((d, i) => d.classList.toggle('on', i === c.idx));
+      const capEl = document.getElementById(id+'-cap');
+      if (capEl) capEl.textContent = c.captions[c.idx];
+    }
+    function moveCarousel(id, dir) {
+      const c = carousels[id];
+      c.idx = (c.idx + dir + c.total) % c.total;
+      renderCarousel(id);
+    }
+    function goCarousel(id, idx) {
+      carousels[id].idx = idx;
+      renderCarousel(id);
+    }
+
+    // ── Project modal close ──
+    function closeProjModal() {
+      document.getElementById('proj-modal').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    document.getElementById('proj-modal-close').addEventListener('click', closeProjModal);
+    document.getElementById('proj-modal').addEventListener('click', function(e) {
+      if (e.target === this) closeProjModal();
+    });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeProjModal();
+    });
+
+    const _ICONS = {
+      github:  `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>`,
+      live:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`,
+      devpost: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.002 1.61 0 12.004 6.002 22.39h11.996L24 12.004 17.998 1.61zm1.593 16.526h-2.26V5.864h2.26c3.807 0 6.27 2.138 6.27 6.07 0 4.003-2.567 6.202-6.27 6.202z"/></svg>`,
+      demo:    `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>`,
+    };
+
+    (async function renderProjects() {
+      try {
+        const res = await fetch('_data/projects.json?t=' + Date.now());
+        if (!res.ok) return;
+        const projects = await res.json();
+        const grid = document.getElementById('proj-grid');
+        if (!grid) return;
+        projects.forEach((proj, pi) => {
+          const cid = 'p' + (proj.id || pi);
+          const images = proj.images || [];
+          let carouselHtml = '';
+          if (images.length) {
+            const imgs = images.map(img => `<img src="${img.url}" alt="${img.caption || ''}" />`).join('');
+            const dots = images.map((_, i) => `<span${i===0?' class="on"':''} onclick="goCarousel('${cid}',${i})"></span>`).join('');
+            carouselHtml = `
+              <div class="carousel-wrap">
+                <div class="carousel-track" id="${cid}-track">${imgs}</div>
+                <button class="carousel-btn prev" onclick="moveCarousel('${cid}',-1)">&#8249;</button>
+                <button class="carousel-btn next" onclick="moveCarousel('${cid}', 1)">&#8250;</button>
+              </div>
+              <div class="carousel-dots" id="${cid}-dots">${dots}</div>`;
+          }
+          const tagsHtml = (proj.tags || []).map(t => `<span>${t}</span>`).join('');
+          const linksHtml = [
+            proj.live    && `<a href="${proj.live}"    target="_blank" title="Live Site">${_ICONS.live}</a>`,
+            proj.github  && `<a href="${proj.github}"  target="_blank" title="GitHub">${_ICONS.github}</a>`,
+            proj.devpost && `<a href="${proj.devpost}" target="_blank" title="Devpost">${_ICONS.devpost}</a>`,
+            proj.demo    && `<a href="${proj.demo}"    target="_blank" title="Demo">${_ICONS.demo}</a>`,
+          ].filter(Boolean).join('');
+          const dateStr = proj.start === proj.end ? proj.start : `${proj.start}${proj.end ? ' – ' + proj.end : ''}`;
+          const card = document.createElement('div');
+          card.className = 'proj-card';
+          card.innerHTML = `
+            ${carouselHtml}
+            <h3 class="proj-name">${proj.name}</h3>
+            <p class="proj-date">${dateStr}</p>
+            <p class="proj-desc">${proj.desc}</p>
+            ${tagsHtml ? `<div class="proj-tags">${tagsHtml}</div>` : ''}
+            ${linksHtml ? `<div class="proj-links">${linksHtml}</div>` : ''}
+          `;
+          card.addEventListener('click', function(e) {
+            // Don't open modal if clicking a link or carousel button
+            if (e.target.closest('a, .carousel-btn')) return;
+            const mcid = 'modal-' + cid;
+            const mimgs = images.map(img => `<img src="${img.url}" alt="${img.caption||''}" />`).join('');
+            const mdots = images.map((_, i) => `<span${i===0?' class="on"':''} onclick="goCarousel('${mcid}',${i})"></span>`).join('');
+            const mCarousel = images.length ? `
+              <div class="carousel-wrap">
+                <div class="carousel-track" id="${mcid}-track">${mimgs}</div>
+                <button class="carousel-btn prev" onclick="moveCarousel('${mcid}',-1)">&#8249;</button>
+                <button class="carousel-btn next" onclick="moveCarousel('${mcid}', 1)">&#8250;</button>
+              </div>
+              <div class="carousel-dots" id="${mcid}-dots">${mdots}</div>` : '';
+            const mLinks = [
+              proj.live    && `<a href="${proj.live}"    target="_blank">${_ICONS.live} Live</a>`,
+              proj.github  && `<a href="${proj.github}"  target="_blank">${_ICONS.github} GitHub</a>`,
+              proj.devpost && `<a href="${proj.devpost}" target="_blank">${_ICONS.devpost} Devpost</a>`,
+              proj.demo    && `<a href="${proj.demo}"    target="_blank">${_ICONS.demo} Demo</a>`,
+            ].filter(Boolean).join('');
+            document.getElementById('proj-modal-body').innerHTML = `
+              ${mCarousel}
+              <div id="proj-modal-title">${proj.name}</div>
+              <div id="proj-modal-date">${dateStr}</div>
+              <div id="proj-modal-desc">${proj.desc}</div>
+              ${tagsHtml ? `<div id="proj-modal-tags">${tagsHtml}</div>` : ''}
+              ${mLinks ? `<div id="proj-modal-links">${mLinks}</div>` : ''}
+            `;
+            document.getElementById('proj-modal').classList.add('open');
+            document.body.style.overflow = 'hidden';
+            if (images.length) initCarousel(mcid, images.map(img => img.caption || ''));
+          });
+          grid.appendChild(card);
+          if (images.length) initCarousel(cid, images.map(img => img.caption || ''));
+        });
+      } catch(e) {}
+    })();
+  </script>
+
+  <!-- ── Active nav highlight on scroll ── -->
+  <script>
+    const sections = document.querySelectorAll('section[id]');
+    const allNavLinks = document.querySelectorAll('nav a, .bottom-nav a');
+
+    // ── Wheel scroll effect ──
+    function updateWheel() {
+      const vh = window.innerHeight;
+      const mid = vh / 2;
+      sections.forEach(sec => {
+        const rect = sec.getBoundingClientRect();
+        const secMid = rect.top + rect.height / 2;
+        const progress = (secMid - mid) / vh; // -1 (above) → 0 (center) → 1 (below)
+        const shift = progress * 60;
+        const scale = Math.max(0.88, 1 - Math.abs(progress) * 0.08);
+        sec.style.transform = `translateY(${shift}px) scale(${scale})`;
+        sec.style.opacity   = 1;
+      });
+    }
+    window.addEventListener('scroll', updateWheel, { passive: true });
+    updateWheel();
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          allNavLinks.forEach(a => a.classList.remove('active'));
+          document.querySelectorAll(`nav a[href="#${entry.target.id}"], .bottom-nav a[href="#${entry.target.id}"]`)
+            .forEach(a => a.classList.add('active'));
+        }
+      });
+    }, { threshold: 0.4 });
+
+    sections.forEach(s => observer.observe(s));
+  </script>
+
+  <script>
+    (function() {
+      const wrap = document.querySelector('.resume-pdf-wrap');
+      const iframe = wrap.querySelector('iframe');
+      const TOOLBAR_H = 56; // Chrome PDF viewer toolbar height in px
+      function sizeIframe() {
+        const w = wrap.offsetWidth;
+        iframe.style.height = (w * (11 / 8.5) + TOOLBAR_H) + 'px';
+      }
+      sizeIframe();
+      window.addEventListener('resize', sizeIframe);
+    })();
+  </script>
+
+  <!-- ── Keyboard arrow navigation ── -->
+  <script>
+    (function() {
+      const secs = Array.from(document.querySelectorAll('section[id]'));
+      document.addEventListener('keydown', function(e) {
+        if (['ArrowDown','ArrowRight','ArrowUp','ArrowLeft'].indexOf(e.key) === -1) return;
+        e.preventDefault();
+        const mid = window.innerHeight / 2;
+        let cur = 0, minDist = Infinity;
+        secs.forEach(function(s, i) {
+          const dist = Math.abs(s.getBoundingClientRect().top + s.offsetHeight / 2 - mid);
+          if (dist < minDist) { minDist = dist; cur = i; }
+        });
+        const next = (e.key === 'ArrowDown' || e.key === 'ArrowRight')
+          ? Math.min(cur + 1, secs.length - 1)
+          : Math.max(cur - 1, 0);
+        secs[next].scrollIntoView({ behavior: 'smooth' });
+      });
+    })();
+  </script>
+  <canvas id="bg-canvas" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;"></canvas>
+
+  <script>
+  (function() {
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+
+    const PARTICLE_COUNT = 80, CONNECT_DIST = 140, BASE_SPEED = 0.35;
+    const SCROLL_BOOST = 4, MOUSE_REPEL = 120, MOUSE_FORCE = 2.5;
+    const GOLD = 'rgba(179,163,105,';
+    function isLight() {
+      const t = document.documentElement.getAttribute('data-theme');
+      const p = document.documentElement.getAttribute('data-period');
+      if (p === 'day') return true;
+      if (p) return false;
+      return t === 'light' || (t !== 'dark' && window.matchMedia('(prefers-color-scheme: light)').matches);
+    }
+    function WHITE() {
+      const p = document.documentElement.getAttribute('data-period');
+      if (p === 'sunset') return 'rgba(255,110,30,';
+      if (p === 'dawn')   return 'rgba(195,140,215,';
+      return isLight() ? 'rgba(0,30,80,' : 'rgba(255,255,255,';
+    }
+
+    let W, H, raf, mode = 'particles';
+    let particles = [], scrollVel = 0, lastScrollY = window.scrollY;
+    let mouse = { x: -9999, y: -9999 };
+    let ripples = [], rippleTimer = 0;
+
+    function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+    function rand(a, b) { return a + Math.random() * (b - a); }
+
+    // ── Particles ──
+    function makeParticle() {
+      const angle = rand(0, Math.PI * 2), speed = rand(BASE_SPEED * 0.5, BASE_SPEED * 1.5);
+      return { x: rand(0, W), y: rand(0, H), vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, r: rand(1.2, 2.6), gold: Math.random() < 0.2 };
+    }
+    function initParticles() { particles = Array.from({ length: PARTICLE_COUNT }, makeParticle); }
+
+    function tickParticles(drawLines) {
+      scrollVel *= 0.92;
+      for (const p of particles) {
+        const boost = 1 + Math.abs(scrollVel) * SCROLL_BOOST;
+        const mdx = p.x - mouse.x, mdy = p.y - mouse.y, mdist = Math.sqrt(mdx*mdx + mdy*mdy);
+        if (mdist < MOUSE_REPEL && mdist > 0) {
+          const force = (1 - mdist / MOUSE_REPEL) * MOUSE_FORCE;
+          p.vx += (mdx / mdist) * force * 0.08; p.vy += (mdy / mdist) * force * 0.08;
+          const spd = Math.sqrt(p.vx*p.vx + p.vy*p.vy), max = BASE_SPEED * 4;
+          if (spd > max) { p.vx = p.vx/spd*max; p.vy = p.vy/spd*max; }
+        } else {
+          const spd = Math.sqrt(p.vx*p.vx + p.vy*p.vy);
+          if (spd > BASE_SPEED * 1.5) { p.vx *= 0.98; p.vy *= 0.98; }
+        }
+        p.x += p.vx * boost; p.y += p.vy * boost + scrollVel * 0.5;
+        if (p.x < -10) p.x = W+10; if (p.x > W+10) p.x = -10;
+        if (p.y < -10) p.y = H+10; if (p.y > H+10) p.y = -10;
+      }
+      if (drawLines) {
+        for (let i = 0; i < particles.length; i++) {
+          for (let j = i+1; j < particles.length; j++) {
+            const a = particles[i], b = particles[j];
+            const dx = a.x-b.x, dy = a.y-b.y, dist = Math.sqrt(dx*dx+dy*dy);
+            if (dist < CONNECT_DIST) {
+              ctx.beginPath(); ctx.strokeStyle = WHITE()+(1-dist/CONNECT_DIST)*0.18+')';
+              ctx.lineWidth = 0.8; ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+            }
+          }
+        }
+      }
+      for (const p of particles) {
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+        ctx.fillStyle = (p.gold ? GOLD : WHITE()) + (p.gold ? '0.55' : '0.4') + ')'; ctx.fill();
+      }
+    }
+
+    // ── Ripples ──
+    function makeRipple() {
+      return { x: rand(0, W), y: rand(0, H), r: 0, maxR: rand(60, 180), speed: rand(0.6, 1.4), gold: Math.random() < 0.25 };
+    }
+    function initRipples() { ripples = Array.from({ length: 10 }, makeRipple).map(r => { r.r = rand(0, r.maxR); return r; }); }
+
+    function tickRipples() {
+      rippleTimer++;
+      if (rippleTimer % 90 === 0) ripples.push(makeRipple());
+      for (let i = ripples.length - 1; i >= 0; i--) {
+        const r = ripples[i];
+        r.r += r.speed;
+        const alpha = (1 - r.r / r.maxR) * 0.22;
+        ctx.beginPath(); ctx.arc(r.x, r.y, r.r, 0, Math.PI * 2);
+        ctx.strokeStyle = (r.gold ? GOLD : WHITE()) + Math.max(0, alpha) + ')';
+        ctx.lineWidth = 1.2; ctx.stroke();
+        if (r.r >= r.maxR) ripples.splice(i, 1);
+      }
+    }
+
+    // ── Shooting Stars ──
+    let bgStars = [], shootingStars = [], starTimer = 0;
+
+    function initStars() {
+      bgStars = Array.from({ length: 220 }, () => ({
+        x: rand(0, W), y: rand(0, H),
+        r: rand(0.4, 1.6),
+        phase: rand(0, Math.PI * 2),
+        speed: rand(0.015, 0.045),
+        gold: Math.random() < 0.08,
+      }));
+      shootingStars = [];
+      starTimer = 0;
+    }
+
+    function makeShootingStar() {
+      const angle = rand(28, 52) * Math.PI / 180;
+      const spd   = rand(10, 20);
+      return {
+        x: rand(-W * 0.1, W * 1.1), y: rand(-80, H * 0.45),
+        vx: Math.cos(angle) * spd, vy: Math.sin(angle) * spd,
+        tailLen: rand(70, 220), alpha: rand(0.7, 1.0),
+        fade: rand(0.008, 0.016),
+        gold: Math.random() < 0.12,
+      };
+    }
+
+    function tickStars() {
+      starTimer++;
+      if (starTimer % 130 === 0 && shootingStars.length < 4) shootingStars.push(makeShootingStar());
+
+      // Static background stars
+      for (const s of bgStars) {
+        s.phase += s.speed;
+        const alpha = 0.2 + Math.abs(Math.sin(s.phase)) * 0.5;
+        ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = (s.gold ? GOLD : 'rgba(255,255,255,') + alpha + ')';
+        ctx.fill();
+      }
+
+      // Shooting stars
+      for (let i = shootingStars.length - 1; i >= 0; i--) {
+        const ss = shootingStars[i];
+        const tailX = ss.x - ss.vx * (ss.tailLen / Math.sqrt(ss.vx*ss.vx + ss.vy*ss.vy));
+        const tailY = ss.y - ss.vy * (ss.tailLen / Math.sqrt(ss.vx*ss.vx + ss.vy*ss.vy));
+        const grad = ctx.createLinearGradient(tailX, tailY, ss.x, ss.y);
+        const col = ss.gold ? '179,163,105' : '255,255,255';
+        grad.addColorStop(0, `rgba(${col},0)`);
+        grad.addColorStop(1, `rgba(${col},${ss.alpha})`);
+        ctx.beginPath(); ctx.moveTo(tailX, tailY); ctx.lineTo(ss.x, ss.y);
+        ctx.strokeStyle = grad; ctx.lineWidth = ss.gold ? 1.8 : 1.4; ctx.stroke();
+
+        // Bright head dot
+        ctx.beginPath(); ctx.arc(ss.x, ss.y, ss.gold ? 2 : 1.5, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${col},${ss.alpha})`; ctx.fill();
+
+        ss.x += ss.vx; ss.y += ss.vy; ss.alpha -= ss.fade;
+        if (ss.alpha <= 0 || ss.x > W + 200 || ss.y > H + 200) shootingStars.splice(i, 1);
+      }
+    }
+
+    // ── Clouds ──
+    let clouds = [];
+    let _cloudMouse = { x: -9999, y: -9999, vx: 0, vy: 0 };
+
+    function makeCloud(x, y) {
+      const w = rand(160, 340);
+      const puffCount = Math.floor(rand(14, 22));
+      const puffs = [];
+      for (let i = 0; i < puffCount; i++) {
+        const ox = rand(-w * 0.55, w * 0.55);
+        const oy = rand(-w * 0.07, w * 0.07);
+        const r  = rand(w * 0.08, w * 0.17);
+        // Very wide, very flat — smoke streaks not blobs
+        const sx = rand(1.4, 2.6);
+        const sy = rand(0.25, 0.55);
+        puffs.push({ ox, oy, r, sx, sy, dx: 0, dy: 0 });
+      }
+      return { x, y, puffs, speed: rand(0.28, 0.65) };
+    }
+
+    function initClouds() {
+      clouds = [];
+      const count = 14;
+      for (let i = 0; i < count; i++) {
+        const x = rand(-200, W + 200);
+        const y = rand(H * 0.04, H * 0.45);
+        clouds.push(makeCloud(x, y));
+      }
+    }
+
+    function tickClouds() {
+      // Track mouse velocity for cut direction
+      _cloudMouse.vx = mouse.x - _cloudMouse.x;
+      _cloudMouse.vy = mouse.y - _cloudMouse.y;
+      _cloudMouse.x = mouse.x;
+      _cloudMouse.y = mouse.y;
+      const mspeed = Math.sqrt(_cloudMouse.vx * _cloudMouse.vx + _cloudMouse.vy * _cloudMouse.vy);
+      // Normalized cursor direction + perpendicular (the cut axis)
+      const mlen = Math.max(mspeed, 0.001);
+      const mnx = _cloudMouse.vx / mlen, mny = _cloudMouse.vy / mlen;
+      const perpx = -mny, perpy = mnx;
+
+      for (const cloud of clouds) {
+        cloud.x += cloud.speed;
+        if (cloud.x > W + 320) { cloud.x = -320; cloud.y = rand(H * 0.04, H * 0.52); }
+
+        for (const puff of cloud.puffs) {
+          const px = cloud.x + puff.ox + puff.dx;
+          const py = cloud.y + puff.oy + puff.dy;
+          const ex = px - mouse.x, ey = py - mouse.y;
+          const ed = Math.sqrt(ex * ex + ey * ey);
+          const influence = puff.r * puff.sx * 1.6; // influence scales with wisp width
+
+          if (ed < influence && ed > 0) {
+            // Persistent radial repulsion — keeps puffs away even when cursor is stationary
+            const staticStr = (1 - ed / influence) * 6;
+            puff.dx += (ex / ed) * staticStr;
+            puff.dy += (ey / ed) * staticStr;
+
+            // Additional directional cut when cursor is moving
+            if (mspeed > 0.5) {
+              const side = ex * perpx + ey * perpy;
+              const cutStr = (1 - ed / influence) * Math.min(mspeed, 30) * 1.4;
+              puff.dx += perpx * Math.sign(side) * cutStr;
+              puff.dy += perpy * Math.sign(side) * cutStr;
+            }
+            // Cap velocity
+            const spd = Math.sqrt(puff.dx * puff.dx + puff.dy * puff.dy);
+            if (spd > 120) { puff.dx = puff.dx / spd * 120; puff.dy = puff.dy / spd * 120; }
+          }
+
+          // Only spring back when cursor is outside influence — suppressed while cursor sits in the gap
+          if (ed >= influence) {
+            puff.dx += (0 - puff.dx) * 0.018;
+            puff.dy += (0 - puff.dy) * 0.018;
+          }
+          puff.dx *= 0.94;
+          puff.dy *= 0.94;
+        }
+
+        ctx.save();
+        ctx.filter = 'blur(6px)';
+        for (const puff of cloud.puffs) {
+          const px = cloud.x + puff.ox + puff.dx;
+          const py = cloud.y + puff.oy + puff.dy;
+          const rx = puff.r * puff.sx;
+          const ry = puff.r * puff.sy;
+          const g = ctx.createRadialGradient(px, py, ry * 0.1, px, py, rx);
+          g.addColorStop(0,    'rgba(255,255,255,0.30)');
+          g.addColorStop(0.35, 'rgba(245,250,255,0.18)');
+          g.addColorStop(0.7,  'rgba(230,242,255,0.07)');
+          g.addColorStop(1,    'rgba(215,235,255,0)');
+          ctx.beginPath();
+          ctx.ellipse(px, py, rx, ry, 0, 0, Math.PI * 2);
+          ctx.fillStyle = g;
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+    }
+
+    // ── Scenery ──
+    let _sunAngle = 0;
+
+    // Sun arc: 5am (east) → noon (zenith) → 8pm (west)
+    function getSunPos() {
+      const now = new Date();
+      const hours = now.getHours() + now.getMinutes() / 60;
+      const t = Math.max(0, Math.min(1, (hours - 5) / 15));
+      const angle = Math.PI * t;
+      return {
+        sx: W / 2 - W * 0.46 * Math.cos(angle),
+        sy: H * 0.88 - H * 0.82 * Math.sin(angle),
+      };
+    }
+
+    // Moon arc: 8pm (east) → ~12:30am (zenith) → 5am (west)
+    function getMoonPos() {
+      const now = new Date();
+      const h = now.getHours() + now.getMinutes() / 60;
+      const adjusted = h < 5 ? h + 24 : h; // treat 0–5am as 24–29
+      const t = Math.max(0, Math.min(1, (adjusted - 20) / 9)); // 8pm–5am = 9 hours
+      const angle = Math.PI * t;
+      return {
+        mx: W / 2 - W * 0.44 * Math.cos(angle),
+        my: H * 0.88 - H * 0.78 * Math.sin(angle),
+      };
+    }
+
+    function drawScenery() {
+      const p = document.documentElement.getAttribute('data-period');
+      if (!p) return;
+      _sunAngle += 0.002;
+
+      // Moon during midnight
+      if (p === 'midnight') {
+        const { mx, my } = getMoonPos();
+        const mr = Math.min(W, H) * 0.038;
+        // outer glow
+        const og = ctx.createRadialGradient(mx, my, mr * 0.5, mx, my, mr * 5);
+        og.addColorStop(0, 'rgba(180,200,255,0.18)');
+        og.addColorStop(0.4, 'rgba(140,170,255,0.07)');
+        og.addColorStop(1, 'rgba(100,140,255,0)');
+        ctx.beginPath(); ctx.arc(mx, my, mr * 5, 0, Math.PI * 2);
+        ctx.fillStyle = og; ctx.fill();
+        // moon disc
+        const dg = ctx.createRadialGradient(mx - mr * 0.25, my - mr * 0.2, mr * 0.05, mx, my, mr);
+        dg.addColorStop(0, 'rgba(240,245,255,1)');
+        dg.addColorStop(0.6, 'rgba(200,215,255,0.97)');
+        dg.addColorStop(1, 'rgba(160,185,240,0.9)');
+        ctx.beginPath(); ctx.arc(mx, my, mr, 0, Math.PI * 2);
+        ctx.fillStyle = dg; ctx.fill();
+        // crescent shadow — offset circle that clips into the disc
+        ctx.save();
+        ctx.globalCompositeOperation = 'destination-out';
+        const sx2 = mx + mr * 0.42, sy2 = my - mr * 0.08;
+        ctx.beginPath(); ctx.arc(sx2, sy2, mr * 0.82, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(0,0,0,0.88)'; ctx.fill();
+        ctx.restore();
+        return;
+      }
+
+      const { sx, sy } = getSunPos();
+
+      if (p === 'day') {
+        const sr = Math.min(W, H) * 0.055;
+        // outer glow
+        const og = ctx.createRadialGradient(sx, sy, sr * 0.5, sx, sy, sr * 5);
+        og.addColorStop(0, 'rgba(255,230,80,0.28)');
+        og.addColorStop(0.4, 'rgba(255,200,50,0.10)');
+        og.addColorStop(1,   'rgba(255,200,50,0)');
+        ctx.beginPath(); ctx.arc(sx, sy, sr * 5, 0, Math.PI * 2);
+        ctx.fillStyle = og; ctx.fill();
+        // disc
+        const dg = ctx.createRadialGradient(sx, sy, 0, sx, sy, sr);
+        dg.addColorStop(0,   'rgba(255,255,230,1)');
+        dg.addColorStop(0.55,'rgba(255,230,80,0.95)');
+        dg.addColorStop(1,   'rgba(255,200,40,0.85)');
+        ctx.beginPath(); ctx.arc(sx, sy, sr, 0, Math.PI * 2);
+        ctx.fillStyle = dg; ctx.fill();
+      }
+
+      if (p === 'dawn') {
+        const sr = Math.min(W, H) * 0.10;
+        // horizon glow
+        const hg = ctx.createRadialGradient(sx, sy, 0, sx, sy, sr * 5.5);
+        hg.addColorStop(0,   'rgba(255,140,60,0.5)');
+        hg.addColorStop(0.25,'rgba(210,80,160,0.22)');
+        hg.addColorStop(0.6, 'rgba(130,30,160,0.08)');
+        hg.addColorStop(1,   'rgba(60,10,120,0)');
+        ctx.beginPath(); ctx.arc(sx, sy, sr * 5.5, 0, Math.PI * 2);
+        ctx.fillStyle = hg; ctx.fill();
+        // sun disc (partially clipped by horizon)
+        const dg = ctx.createRadialGradient(sx, sy, 0, sx, sy, sr);
+        dg.addColorStop(0,   'rgba(255,210,100,1)');
+        dg.addColorStop(0.6, 'rgba(255,130,60,0.95)');
+        dg.addColorStop(1,   'rgba(200,80,180,0.8)');
+        ctx.save();
+        ctx.beginPath(); ctx.rect(0, 0, W, H); ctx.clip(); // keep within canvas
+        ctx.beginPath(); ctx.arc(sx, sy, sr, 0, Math.PI * 2);
+        ctx.fillStyle = dg; ctx.fill();
+        ctx.restore();
+        // soft rim
+        const rim = ctx.createRadialGradient(sx, sy, sr * 0.8, sx, sy, sr * 1.6);
+        rim.addColorStop(0, 'rgba(255,180,80,0.18)');
+        rim.addColorStop(1, 'rgba(255,100,60,0)');
+        ctx.beginPath(); ctx.arc(sx, sy, sr * 1.6, 0, Math.PI * 2);
+        ctx.fillStyle = rim; ctx.fill();
+      }
+
+      if (p === 'sunset') {
+        const sr = Math.min(W, H) * 0.065;
+        // large outer glow
+        const og = ctx.createRadialGradient(sx, sy, sr * 0.5, sx, sy, sr * 7);
+        og.addColorStop(0,   'rgba(255,140,20,0.38)');
+        og.addColorStop(0.3, 'rgba(220,60,20,0.14)');
+        og.addColorStop(0.6, 'rgba(160,20,60,0.06)');
+        og.addColorStop(1,   'rgba(80,0,30,0)');
+        ctx.beginPath(); ctx.arc(sx, sy, sr * 7, 0, Math.PI * 2);
+        ctx.fillStyle = og; ctx.fill();
+        // horizon streak
+        const streak = ctx.createLinearGradient(0, sy - sr * 0.5, 0, sy + sr * 2);
+        streak.addColorStop(0, 'rgba(255,120,20,0.18)');
+        streak.addColorStop(1, 'rgba(200,40,20,0)');
+        ctx.fillStyle = streak;
+        ctx.fillRect(0, sy - sr * 0.5, W, sr * 2.5);
+        // disc
+        const dg = ctx.createRadialGradient(sx, sy, 0, sx, sy, sr);
+        dg.addColorStop(0,   'rgba(255,230,120,1)');
+        dg.addColorStop(0.45,'rgba(255,140,30,0.97)');
+        dg.addColorStop(1,   'rgba(220,60,20,0.88)');
+        ctx.beginPath(); ctx.arc(sx, sy, sr, 0, Math.PI * 2);
+        ctx.fillStyle = dg; ctx.fill();
+        // pulsing corona
+        const alpha = 0.12 + 0.06 * Math.sin(_sunAngle * 3);
+        const corona = ctx.createRadialGradient(sx, sy, sr, sx, sy, sr * 2.2);
+        corona.addColorStop(0, `rgba(255,160,40,${alpha})`);
+        corona.addColorStop(1, 'rgba(255,80,0,0)');
+        ctx.beginPath(); ctx.arc(sx, sy, sr * 2.2, 0, Math.PI * 2);
+        ctx.fillStyle = corona; ctx.fill();
+      }
+    }
+
+    // ── Tick ──
+    function tick() {
+      ctx.clearRect(0, 0, W, H);
+      drawScenery();
+      if (mode === 'particles')          tickParticles(true);
+      else if (mode === 'particles-only') tickParticles(false);
+      else if (mode === 'ripples')        tickRipples();
+      else if (mode === 'shooting-stars') tickStars();
+      else if (mode === 'clouds')         tickClouds();
+      raf = requestAnimationFrame(tick);
+    }
+
+    // ── Public API ──
+    window._bgEffect = {
+      setMode: function(m) {
+        mode = m;
+        cancelAnimationFrame(raf);
+        if (m === 'none') { canvas.style.display = 'none'; return; }
+        canvas.style.display = '';
+        resize();
+        if (m === 'ripples')             initRipples();
+        else if (m === 'shooting-stars') initStars();
+        else if (m === 'clouds')         initClouds();
+        else                             initParticles();
+        tick();
+      }
+    };
+
+    window.addEventListener('resize', resize);
+    window.addEventListener('scroll', function() {
+      const y = window.scrollY; scrollVel = (y - lastScrollY) * 0.04; lastScrollY = y;
+    });
+    window.addEventListener('mousemove', function(e) { mouse.x = e.clientX; mouse.y = e.clientY; });
+    window.addEventListener('mouseleave', function() { mouse.x = -9999; mouse.y = -9999; });
+
+    resize(); initParticles(); tick();
+  })();
+  </script>
+  <script>
+    (async function() {
+      // Apply effect setting (background follows system dark/light mode via CSS)
+      try {
+        const sRes = await fetch('_data/settings.json?t=' + Date.now());
+        if (sRes.ok) {
+          const s = await sRes.json();
+          if (s.effectType && window._bgEffect) {
+            const _period = document.documentElement.getAttribute('data-period');
+            // Day mode always uses clouds; don't override with settings effectType
+            if (_period !== 'day') window._bgEffect.setMode(s.effectType);
+          }
+        }
+      } catch(e) {}
+
+      // ── Hero ──
+      try {
+        const res = await fetch('_data/hero.json?t=' + Date.now());
+        if (res.ok) {
+          const h = await res.json();
+          if (h.tagline) document.getElementById('hero-eyebrow').textContent = h.tagline;
+          if (h.name)    document.getElementById('hero-name').textContent    = h.name;
+          if (h.desc)    document.getElementById('hero-tagline').textContent = h.desc;
+          if (h.name)    document.getElementById('footer-name').textContent  = h.name;
+          if (h.name)    document.title = h.name;
+          if (h.name) {
+            const logo = document.getElementById('header-logo-name');
+            if (logo) {
+              const parts = h.name.trim().split(' ');
+              const last = parts.pop();
+              logo.innerHTML = parts.join(' ') + (parts.length ? ' ' : '') + `<span>${last}</span>`;
+            }
+          }
+        }
+      } catch(e) {}
+      document.getElementById('footer-year').textContent = new Date().getFullYear();
+
+      // Preview mode: URL params override stored layout
+      const _params = new URLSearchParams(location.search);
+      const _paramOrder  = _params.get('order');
+      const _paramHidden = _params.get('hidden');
+      let sectionOrder = [], hiddenSections = [];
+
+      if (_paramOrder !== null || _paramHidden !== null) {
+        sectionOrder  = _paramOrder  ? _paramOrder.split(',')  : [];
+        hiddenSections = _paramHidden ? _paramHidden.split(',') : [];
+      } else {
+        try {
+          const res = await fetch('_data/layout.json?t=' + Date.now());
+          if (res.ok) {
+            const d = await res.json();
+            sectionOrder   = d.sectionOrder   || [];
+            hiddenSections = d.hiddenSections  || [];
+          }
+        } catch(e) {}
+      }
+
+      if (sectionOrder.length || hiddenSections.length) {
+        const container = document.getElementById('home')?.parentNode;
+        const nav       = document.querySelector('header nav');
+        const bottomNav = document.querySelector('.bottom-nav');
+
+        hiddenSections.forEach(id => {
+          const section = document.getElementById(id);
+          if (section) section.style.display = 'none';
+          if (nav)       { const l = nav.querySelector(`[href="#${id}"]`);       if (l) l.style.display = 'none'; }
+          if (bottomNav) { const l = bottomNav.querySelector(`[href="#${id}"]`); if (l) l.style.display = 'none'; }
+        });
+
+        if (container && sectionOrder.length) {
+          const footer = container.querySelector('footer');
+          sectionOrder.forEach(id => {
+            if (id === 'home') return;
+            const section = document.getElementById(id);
+            if (section) footer ? container.insertBefore(section, footer) : container.appendChild(section);
+          });
+          if (nav) sectionOrder.forEach(id => {
+            if (id === 'home') return;
+            const link = nav.querySelector(`[href="#${id}"]`);
+            if (link) nav.appendChild(link);
+          });
+          if (bottomNav) sectionOrder.forEach(id => {
+            if (id === 'home') return;
+            const link = bottomNav.querySelector(`[href="#${id}"]`);
+            if (link) bottomNav.appendChild(link);
+          });
+        }
+      }
+
+      // ── Social links (About + Footer) ──
+      try {
+        const aboutRes = await fetch('_data/aboutme.json?t=' + Date.now());
+        if (aboutRes.ok) {
+          const aboutData = await aboutRes.json();
+          if (aboutData.bio) { const b = document.getElementById('about-bio-text'); if (b) b.textContent = aboutData.bio; }
+          if (aboutData.photo) {
+            const img = document.getElementById('about-photo');
+            if (img) { img.src = aboutData.photo; img.style.display = 'block'; }
+          }
+          const s = aboutData.social || {};
+          const _SOCIAL_SVGS = {
+            linkedin:  `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452H16.89v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a1.977 1.977 0 1 1 0-3.954 1.977 1.977 0 0 1 0 3.954zm1.707 13.019H3.63V9h3.414v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>`,
+            github:    `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>`,
+            email:     `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-.53.24-1.017.645-1.338L12 12.5 23.355 4.12c.404.32.645.807.645 1.337z"/></svg>`,
+            youtube:   `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>`,
+            spotify:   `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>`,
+            instagram: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>`,
+            facebook:  `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>`,
+            x:         `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>`,
+            reddit:    `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/></svg>`,
+          };
+          const platforms = [
+            { key: 'linkedin',  label: 'LinkedIn',  href: v => v },
+            { key: 'github',    label: 'GitHub',    href: v => v },
+            { key: 'email',     label: 'Email',     href: v => 'mailto:' + v },
+            { key: 'youtube',   label: 'YouTube',   href: v => v },
+            { key: 'spotify',   label: 'Spotify',   href: v => v },
+            { key: 'instagram', label: 'Instagram', href: v => v },
+            { key: 'facebook',  label: 'Facebook',  href: v => v },
+            { key: 'x',         label: 'X',         href: v => v },
+            { key: 'reddit',    label: 'Reddit',    href: v => v },
+          ];
+          const aboutLinks  = document.getElementById('about-social-links');
+          const footerIcons = document.getElementById('footer-social-icons');
+          platforms.forEach(({ key, label, href }) => {
+            const val = s[key];
+            if (!val) return;
+            const svg = _SOCIAL_SVGS[key];
+            const target = key === 'email' ? '' : ' target="_blank"';
+            if (aboutLinks)  aboutLinks.insertAdjacentHTML('beforeend',  `<a href="${href(val)}"${target} title="${label}" aria-label="${label}">${svg}</a>`);
+            if (footerIcons) footerIcons.insertAdjacentHTML('beforeend', `<a href="${href(val)}"${target} aria-label="${label}">${svg}</a>`);
+          });
+        }
+      } catch(e) {}
+
+      // ── CV ──
+      try {
+        const cvRes = await fetch('_data/cv.json?t=' + Date.now());
+        if (cvRes.ok) {
+          const { url } = await cvRes.json();
+          if (url) {
+            const wrap = document.getElementById('cv-pdf-wrap');
+            if (wrap) wrap.innerHTML = `<iframe src="${url}#view=FitH" title="CV"></iframe>`;
+          }
+        }
+      } catch(e) {}
+
+      // ── Education ──
+      try {
+        const res = await fetch('_data/education.json?t=' + Date.now());
+        if (res.ok) {
+          const items = await res.json();
+          const list = document.getElementById('education-list');
+          items.forEach(e => {
+            const courses = (e.coursework || []).map(c => `<span>${c}</span>`).join('');
+            list.insertAdjacentHTML('beforeend', `
+              <div class="edu-card">
+                <div class="edu-header">
+                  ${e.logoURL ? `<img src="${e.logoURL}" alt="${e.institution}" class="edu-logo" onerror="this.style.display='none'" />` : ''}
+                  <div>
+                    <h3 class="edu-school">${e.institution}</h3>
+                    ${e.degree ? `<p class="edu-degree">${e.degree}</p>` : ''}
+                    <p class="edu-meta">${[e.location, e.gpa ? 'GPA: ' + e.gpa : '', e.end ? (e.start ? e.start + ' – ' : '') + e.end : ''].filter(Boolean).join(' · ')}</p>
+                  </div>
+                </div>
+                ${courses ? `<div class="edu-courses"><p class="edu-courses-label">Relevant Coursework</p><div class="course-grid">${courses}</div></div>` : ''}
+              </div>`);
+          });
+        }
+      } catch(e) {}
+
+      // ── Experience ──
+      try {
+        const res = await fetch('_data/experience.json?t=' + Date.now());
+        if (res.ok) {
+          const items = await res.json();
+          const list = document.getElementById('experience-list');
+          items.forEach(e => {
+            const bullets = (e.bullets || []).map(b => `<li>${b}</li>`).join('');
+            const date = [e.start, e.end === 'Current' ? 'Present' : e.end].filter(Boolean).join(' – ');
+            list.insertAdjacentHTML('beforeend', `
+              <div class="exp-card">
+                <div class="exp-header">
+                  <div>
+                    <h3 class="exp-role">${e.role}</h3>
+                    <p class="exp-org">${e.company}</p>
+                  </div>
+                  ${date ? `<span class="exp-date">${date}</span>` : ''}
+                </div>
+                ${bullets ? `<ul class="exp-bullets">${bullets}</ul>` : ''}
+                ${e.link ? `<a href="${e.link}" target="_blank" class="exp-link">${e.linkLabel || 'Learn more →'}</a>` : ''}
+              </div>`);
+          });
+        }
+      } catch(e) {}
+
+      // ── FAQ ──
+      try {
+        const res = await fetch('_data/faq.json?t=' + Date.now());
+        if (!res.ok) return;
+        const { heading = '', desc = '', items = [] } = await res.json();
+        if (heading) document.getElementById('faq-heading-display').textContent = heading;
+        if (desc)    document.getElementById('faq-desc-display').textContent = desc;
+        const grid = document.getElementById('faq-grid');
+        items.forEach(item => {
+          const card = document.createElement('div');
+          card.className = 'faq-card';
+          card.innerHTML = `
+            <div class="faq-card-inner">
+              <button class="faq-toggle" aria-expanded="false">
+                <span>${item.question}</span>
+                <svg class="faq-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </button>
+              <div class="faq-answer" style="display:none;">${item.answer}</div>
+            </div>`;
+          card.querySelector('.faq-toggle').addEventListener('click', function() {
+            const ans  = card.querySelector('.faq-answer');
+            const icon = card.querySelector('.faq-icon');
+            const open = ans.style.display !== 'none';
+            ans.style.display = open ? 'none' : 'block';
+            this.setAttribute('aria-expanded', !open);
+            icon.style.transform = open ? '' : 'rotate(45deg)';
+          });
+          grid.appendChild(card);
+        });
+      } catch(e) {}
+
+      // ── Blog ──
+      try {
+        const res = await fetch('_data/blog.json?t=' + Date.now());
+        if (res.ok) {
+          const { heading = '', desc = '', posts = [] } = await res.json();
+          if (heading) document.getElementById('blog-heading-display').textContent = heading;
+          if (desc)    document.getElementById('blog-desc-display').textContent = desc;
+          const grid = document.getElementById('blog-grid');
+          posts.forEach(post => {
+            const card = document.createElement('div');
+            card.className = 'blog-card';
+            const tagsHtml = (post.tags||[]).length
+              ? `<div class="blog-card-tags">${post.tags.map(t=>`<span>${t}</span>`).join('')}</div>` : '';
+            const linkHtml = post.link
+              ? `<a class="blog-card-link" href="${post.link}" target="_blank" rel="noopener">Read more →</a>` : '';
+            const inner = `
+              <div class="blog-card-date">${post.date || ''}</div>
+              <div class="blog-card-title">${post.title}</div>
+              <div class="blog-card-summary">${post.summary || ''}</div>
+              ${tagsHtml}
+              ${linkHtml}`;
+            card.innerHTML = post.link
+              ? `<a href="${post.link}" target="_blank" rel="noopener" style="display:contents;">${inner}</a>`
+              : inner;
+            grid.appendChild(card);
+          });
+        }
+      } catch(e) {}
+
+      // ── Certifications ──
+      try {
+        const res = await fetch('_data/certifications.json?t=' + Date.now());
+        if (res.ok) {
+          const { heading = '', items = [] } = await res.json();
+          if (heading) document.getElementById('cert-heading-display').textContent = heading;
+          const grid = document.getElementById('cert-grid');
+          items.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'cert-card';
+            const dates = [item.date, item.expiry ? `Expires ${item.expiry}` : ''].filter(Boolean).join(' · ');
+            card.innerHTML = `
+              <div class="cert-name">${item.name}</div>
+              ${item.issuer ? `<div class="cert-issuer">${item.issuer}</div>` : ''}
+              ${dates ? `<div class="cert-dates">${dates}</div>` : ''}
+              ${item.url ? `<a class="cert-link" href="${item.url}" target="_blank" rel="noopener">View credential →</a>` : ''}`;
+            grid.appendChild(card);
+          });
+        }
+      } catch(e) {}
+
+      // ── Awards ──
+      try {
+        const res = await fetch('_data/awards.json?t=' + Date.now());
+        if (res.ok) {
+          const { heading = '', items = [] } = await res.json();
+          if (heading) document.getElementById('awards-heading-display').textContent = heading;
+          const grid = document.getElementById('awards-grid');
+          items.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'award-card';
+            card.innerHTML = `
+              <div class="award-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(179,163,105,0.9)" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>
+              </div>
+              <div class="award-body">
+                <div class="award-title">${item.title}</div>
+                <div class="award-meta">${[item.issuer, item.date].filter(Boolean).join(' · ')}</div>
+                ${item.desc ? `<div class="award-desc">${item.desc}</div>` : ''}
+                ${item.link ? `<a class="award-link" href="${item.link}" target="_blank" rel="noopener">Learn more →</a>` : ''}
+              </div>`;
+            grid.appendChild(card);
+          });
+        }
+      } catch(e) {}
+
+      // ── Research ──
+      try {
+        const res = await fetch('_data/research.json?t=' + Date.now());
+        if (res.ok) {
+          const { heading = '', desc = '', items = [] } = await res.json();
+          if (heading) document.getElementById('research-heading-display').textContent = heading;
+          if (desc)    document.getElementById('research-desc-display').textContent = desc;
+          const grid = document.getElementById('research-grid');
+          items.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'research-card';
+            const dateLine = [item.startDate, item.endDate || 'Present'].filter(Boolean).join(' – ');
+            const roleLine = [item.role, item.institution, item.advisor ? `Advisor: ${item.advisor}` : ''].filter(Boolean).join(' · ');
+            const tagsHtml = (item.tags||[]).length
+              ? `<div class="research-tags">${item.tags.map(t=>`<span>${t}</span>`).join('')}</div>` : '';
+            card.innerHTML = `
+              <div class="research-title">${item.title}</div>
+              ${roleLine ? `<div class="research-role-line">${roleLine}${dateLine ? ' &nbsp;·&nbsp; '+dateLine : ''}</div>` : ''}
+              ${item.abstract ? `<div class="research-abstract">${item.abstract}</div>` : ''}
+              ${tagsHtml}
+              ${item.link ? `<a class="research-link" href="${item.link}" target="_blank" rel="noopener">View paper / poster →</a>` : ''}`;
+            grid.appendChild(card);
+          });
+        }
+      } catch(e) {}
+
+      // ── Map ──
+      try {
+        const res = await fetch('_data/map.json?t=' + Date.now());
+        if (res.ok) {
+          const places = await res.json();
+          const mapEl = document.getElementById('trips-map');
+          if (places.length && mapEl) {
+            const map = L.map('trips-map', { scrollWheelZoom: false });
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+              attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
+              maxZoom: 18,
+            }).addTo(map);
+            const pinIcon = L.divIcon({ className: 'trips-map-pin', iconSize: [12,12], iconAnchor: [6,6] });
+            const bounds = [];
+            places.forEach(p => {
+              const m = L.marker([p.lat, p.lng], { icon: pinIcon }).addTo(map);
+              m.bindPopup(`<strong>${p.emoji ? p.emoji + ' ' : ''}${p.name}</strong>`);
+              bounds.push([p.lat, p.lng]);
+            });
+            if (bounds.length === 1) map.setView(bounds[0], 5);
+            else map.fitBounds(bounds, { padding: [40, 40] });
+          } else {
+            mapEl.style.display = 'none';
+          }
+        }
+      } catch(e) { document.getElementById('trips-map').style.display='none'; }
+
+      // ── Trips ──
+      try {
+        const res = await fetch('_data/trips.json?t=' + Date.now());
+        if (res.ok) {
+          const trips = await res.json();
+          const grid = document.getElementById('trips-grid');
+          trips.forEach((trip, ti) => {
+            const cid = 'trip-' + (trip.id || ti);
+            const images = trip.images || [];
+            const imgs = images.map(img => `<img src="${img.url}" alt="${img.caption||''}" />`).join('');
+            const dots = images.map((_, i) => `<span${i===0?' class="on"':''} onclick="goCarousel('${cid}',${i})"></span>`).join('');
+            const block = document.createElement('div');
+            block.className = 'hobby-block';
+            block.innerHTML = `
+              <h3>${trip.emoji ? trip.emoji + ' ' : ''}${trip.label}</h3>
+              ${trip.desc ? `<p>${trip.desc}</p>` : ''}
+              ${images.length ? `
+                <div class="carousel-wrap">
+                  <div class="carousel-track" id="${cid}-track">${imgs}</div>
+                  <button class="carousel-btn prev" onclick="moveCarousel('${cid}',-1)">&#8249;</button>
+                  <button class="carousel-btn next" onclick="moveCarousel('${cid}', 1)">&#8250;</button>
+                </div>
+                <div class="carousel-dots" id="${cid}-dots">${dots}</div>
+                <div class="carousel-caption" id="${cid}-cap"></div>
+              ` : ''}
+            `;
+            grid.appendChild(block);
+            if (images.length) initCarousel(cid, images.map(img => img.caption || ''));
+          });
+        }
+      } catch(e) {}
+
+      // ── Hobbies ──
+      try {
+        const res = await fetch('_data/hobbies.json?t=' + Date.now());
+        if (res.ok) {
+          const hobbies = await res.json();
+          const grid = document.getElementById('hobbies-grid');
+          hobbies.forEach((hobby, hi) => {
+            const cid = 'hobby-' + (hobby.id || hi);
+            const images = hobby.images || [];
+            const imgs = images.map(img => `<img src="${img.url}" alt="${img.caption||''}" />`).join('');
+            const dots = images.map((_, i) => `<span${i===0?' class="on"':''} onclick="goCarousel('${cid}',${i})"></span>`).join('');
+            const block = document.createElement('div');
+            block.className = 'hobby-block';
+            block.innerHTML = `
+              <h3>${hobby.emoji ? hobby.emoji + ' ' : ''}${hobby.label}</h3>
+              ${hobby.desc ? `<p>${hobby.desc}</p>` : ''}
+              ${images.length ? `
+                <div class="carousel-wrap">
+                  <div class="carousel-track" id="${cid}-track">${imgs}</div>
+                  <button class="carousel-btn prev" onclick="moveCarousel('${cid}',-1)">&#8249;</button>
+                  <button class="carousel-btn next" onclick="moveCarousel('${cid}', 1)">&#8250;</button>
+                </div>
+                <div class="carousel-dots" id="${cid}-dots">${dots}</div>
+                <div class="carousel-caption" id="${cid}-cap"></div>
+              ` : ''}
+            `;
+            grid.appendChild(block);
+            if (images.length) initCarousel(cid, images.map(img => img.caption || ''));
+          });
+        }
+      } catch(e) {}
+
+      // ── My Notes ──
+      try {
+        const res = await fetch('_data/notes.json?t=' + Date.now());
+        if (res.ok) {
+          const { heading = '', desc = '', items = [] } = await res.json();
+          if (heading) document.getElementById('notes-heading-display').textContent = heading;
+          if (desc)    document.getElementById('notes-desc-display').textContent = desc;
+          const grid = document.getElementById('notes-grid');
+          items.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'note-card';
+            card.innerHTML = `
+              <div class="note-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+              </div>
+              <div class="note-card-title">${item.title}</div>
+              ${item.course ? `<div class="note-card-course">${item.course}</div>` : ''}
+              ${item.desc   ? `<div class="note-card-desc">${item.desc}</div>`     : ''}
+              <div class="note-card-cta">Click to view PDF →</div>
+            `;
+            card.addEventListener('click', function() {
+              document.getElementById('notes-modal-title').textContent  = item.title;
+              document.getElementById('notes-modal-course').textContent = item.course || '';
+              document.getElementById('notes-modal-iframe').src = item.url + '?t=' + Date.now();
+              const modal = document.getElementById('notes-modal');
+              modal.style.display = 'flex';
+              document.body.style.overflow = 'hidden';
+            });
+            grid.appendChild(card);
+          });
+        }
+      } catch(e) {}
+
+      // ── Gear ──
+      try {
+        const res = await fetch('_data/gear.json?t=' + Date.now());
+        if (res.ok) {
+          const { heading='', desc='', items=[] } = await res.json();
+          if (heading) document.getElementById('gear-heading-display').textContent = heading;
+          if (desc)    document.getElementById('gear-desc-display').textContent = desc;
+          const grid = document.getElementById('gear-grid');
+          // Group by category
+          const cats = {};
+          items.forEach(item => { const c = item.category||'Other'; (cats[c]=cats[c]||[]).push(item); });
+          Object.entries(cats).forEach(([cat, catItems]) => {
+            const label = document.createElement('div');
+            label.className = 'gear-section-label'; label.textContent = cat;
+            grid.appendChild(label);
+            const row = document.createElement('div');
+            row.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:8px;';
+            catItems.forEach(item => {
+              const card = document.createElement('div');
+              card.className = 'gear-card';
+              card.innerHTML = `
+                <div class="gear-card-category">${item.category||''}</div>
+                <div class="gear-card-name">${item.name}</div>
+                ${item.desc ? `<div class="gear-card-desc">${item.desc}</div>` : ''}
+                ${item.link ? `<a class="gear-card-link" href="${item.link}" target="_blank" rel="noopener">View →</a>` : ''}`;
+              row.appendChild(card);
+            });
+            grid.appendChild(row);
+          });
+        }
+      } catch(e) {}
+
+      // ── Spotify ──
+      try {
+        const res = await fetch('_data/spotify.json?t=' + Date.now());
+        if (res.ok) {
+          const { updated='', tracks=[] } = await res.json();
+          const grid = document.getElementById('spotify-grid');
+          tracks.forEach(track => {
+            const card = document.createElement('a');
+            card.className = 'spotify-card';
+            card.href = track.url || '#'; card.target = '_blank'; card.rel = 'noopener';
+            card.innerHTML = `
+              ${track.albumArt ? `<img src="${track.albumArt}" alt="${track.album||''}" />` : ''}
+              <div class="spotify-card-body">
+                <div class="spotify-card-track">${track.name}</div>
+                <div class="spotify-card-artist">${track.artist}</div>
+              </div>`;
+            grid.appendChild(card);
+          });
+          if (updated) document.getElementById('spotify-updated').textContent = 'Updated ' + new Date(updated).toLocaleString();
+          if (!tracks.length) document.getElementById('spotify-grid').innerHTML = '<p style="opacity:0.4;text-align:center;padding:20px 0;">No tracks yet — set up the GitHub Action to start syncing.</p>';
+        }
+      } catch(e) {}
+    })();
+  </script>
+  <script>
+    function closeNotesModal() {
+      const modal = document.getElementById('notes-modal');
+      modal.style.display = 'none';
+      document.getElementById('notes-modal-iframe').src = '';
+      document.body.style.overflow = '';
+    }
+    document.getElementById('notes-modal').addEventListener('click', function(e) {
+      if (e.target === this) closeNotesModal();
+    });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && document.getElementById('notes-modal').style.display === 'flex') closeNotesModal();
+    });
+  </script>
+  <script>
+    (function() {
+      const STORAGE_KEY = 'portfolio-theme';
+      const html = document.documentElement;
+      const toggle = document.getElementById('themeToggle');
+      let _timerId = null;
+
+      function getTimePeriod() {
+        const h = new Date().getHours();
+        if (h >= 5  && h < 8)  return 'dawn';
+        if (h >= 8  && h < 17) return 'day';
+        if (h >= 17 && h < 20) return 'sunset';
+        return 'midnight';
+      }
+
+      function applyTheme(mode) {
+        clearInterval(_timerId);
+        html.removeAttribute('data-period');
+
+        if (mode === 'time') {
+          html.setAttribute('data-theme', 'time');
+          function syncPeriod() {
+            const p = getTimePeriod();
+            html.setAttribute('data-period', p);
+            if (window._bgEffect) window._bgEffect.setMode(p === 'midnight' ? 'shooting-stars' : p === 'day' ? 'clouds' : 'none');
+          }
+          syncPeriod();
+          _timerId = setInterval(syncPeriod, 60000);
+        } else if (mode === 'dark' || mode === 'light') {
+          html.setAttribute('data-theme', mode);
+          if (window._bgEffect) window._bgEffect.setMode('particles');
+        } else {
+          html.removeAttribute('data-theme');
+          if (window._bgEffect) window._bgEffect.setMode('particles');
+        }
+
+        toggle.querySelectorAll('button').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.mode === mode);
+        });
+      }
+
+      applyTheme(localStorage.getItem(STORAGE_KEY) || 'auto');
+
+      toggle.addEventListener('click', function(e) {
+        const btn = e.target.closest('button[data-mode]');
+        if (!btn) return;
+        const mode = btn.dataset.mode;
+        localStorage.setItem(STORAGE_KEY, mode);
+        applyTheme(mode);
+      });
+    })();
+  </script>
+</body>
+</html>
