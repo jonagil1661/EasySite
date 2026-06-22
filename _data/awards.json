@@ -1,4 +1,19 @@
 {
   "heading": "Awards & Honors",
-  "items": []
+  "items": [
+    {
+      "title": "Dean's List",
+      "issuer": "Georgia Institute of Technology",
+      "date": "2026-06-22",
+      "desc": "",
+      "link": ""
+    },
+    {
+      "title": "2022 Olympics Gold Medalist",
+      "issuer": "Olympics",
+      "date": "2022-08-10",
+      "desc": "Gold Medal for Badminton - Men's Singles",
+      "link": ""
+    }
+  ]
 }
