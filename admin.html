@@ -2512,6 +2512,85 @@
     showError(input, getErrorMsg(input));
   }
 
+  function validateRequiredField(field, msg, invalids) {
+    if (!field) return;
+    if (!field.value.trim()) {
+      showError(field, msg);
+      invalids.push(field);
+    } else if (field.classList.contains('field-invalid') && field.nextElementSibling?.classList.contains('field-error-msg')) {
+      showError(field, null);
+    }
+  }
+
+  function validateCardFields(cardSelector, fields, invalids) {
+    document.querySelectorAll(cardSelector).forEach(card => {
+      fields.forEach(([fieldSelector, msg]) => validateRequiredField(card.querySelector(fieldSelector), msg, invalids));
+    });
+  }
+
+  function isValidDateValue(value) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+    const parsed = new Date(value + 'T00:00:00');
+    return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
+  }
+
+  function validateAllRequiredFields() {
+    const invalids = [];
+    validateRequiredField(document.getElementById('hero-tagline'), 'Hero tagline is required', invalids);
+    validateRequiredField(document.getElementById('hero-name'), 'Hero name is required', invalids);
+    validateRequiredField(document.getElementById('hero-desc'), 'Hero description is required', invalids);
+    validateRequiredField(document.getElementById('about-bio'), 'About bio is required', invalids);
+
+    validateCardFields('#exp-list .card', [
+      ['.exp-company', 'Company is required'],
+      ['.exp-role', 'Role is required'],
+      ['.exp-start', 'Start date is required'],
+    ], invalids);
+
+    validateCardFields('#edu-list .card', [
+      ['.edu-institution', 'Institution is required'],
+      ['.edu-location', 'Location is required'],
+      ['.edu-degree', 'Degree is required'],
+      ['.edu-start', 'Start date is required'],
+      ['.edu-end', 'End date is required'],
+    ], invalids);
+
+    validateCardFields('#proj-list .card', [
+      ['.proj-name', 'Project name is required'],
+      ['.proj-start', 'Project start date is required'],
+      ['.proj-desc', 'Project description is required'],
+    ], invalids);
+
+    validateCardFields('#hobbies-list .card', [['.hobby-label', 'Hobby label is required']], invalids);
+    validateCardFields('#trips-list .card', [['.trip-label', 'Trip label is required']], invalids);
+    validateCardFields('#gear-list .card', [['.gear-name', 'Gear item name is required']], invalids);
+    validateCardFields('#notes-list .card', [['.note-title', 'Note title is required']], invalids);
+    validateCardFields('#blog-list .card', [['.blog-title', 'Blog post title is required']], invalids);
+    validateCardFields('#cert-list .card', [['.cert-name', 'Certification name is required']], invalids);
+    validateCardFields('#research-list .card', [['.research-title', 'Research title is required']], invalids);
+
+    const today = new Date().toISOString().slice(0, 10);
+    document.querySelectorAll('#awards-list .card').forEach(card => {
+      validateRequiredField(card.querySelector('.award-title'), 'Award title is required', invalids);
+      validateRequiredField(card.querySelector('.award-issuer'), 'Issuer / organization is required', invalids);
+      const date = card.querySelector('.award-date');
+      validateRequiredField(date, 'Award date is required', invalids);
+      if (date && date.value.trim()) {
+        let msg = null;
+        if (!isValidDateValue(date.value)) msg = 'Enter a valid award date';
+        else if (date.value > today) msg = 'Award date cannot be in the future';
+        if (msg) {
+          showError(date, msg);
+          invalids.push(date);
+        } else if (date.classList.contains('field-invalid')) {
+          showError(date, null);
+        }
+      }
+    });
+
+    return invalids;
+  }
+
   // Event delegation — catches statically rendered AND dynamically added inputs
   document.addEventListener('blur', function(e) {
     const el = e.target;
@@ -2530,7 +2609,7 @@
   // Pre-save validation — block save if any field is invalid
   const origSaveAll = window.saveAll;
   window.saveAll = async function() {
-    const invalids = [];
+    const invalids = validateAllRequiredFields();
     document.querySelectorAll('input[type="url"], input[data-validate="email"]').forEach(input => {
       validateInput(input);
       if (input.classList.contains('field-invalid')) invalids.push(input);
