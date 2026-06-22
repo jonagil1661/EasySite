@@ -803,8 +803,6 @@
           <p>Write posts that appear in the Blog section of your site.</p>
         </div>
         <div class="card">
-          <label>Section heading</label>
-          <input type="text" id="blog-heading" placeholder="Writing" />
           <label>Section description</label>
           <textarea id="blog-desc" rows="2" placeholder="Thoughts on tech, life, and everything in between."></textarea>
         </div>
@@ -1494,7 +1492,6 @@
   async function loadBlog() {
     const d = await ghRead('_data/blog.json');
     if (!d) return;
-    document.getElementById('blog-heading').value = d.heading || '';
     document.getElementById('blog-desc').value    = d.desc    || '';
     (d.posts || []).forEach(p => addBlogCard(p));
   }
@@ -1517,8 +1514,6 @@
       <textarea class="blog-summary" rows="3" placeholder="A short description shown on the card..." required>${data.summary||''}</textarea>
       <label>Tags <span style="font-weight:400;opacity:0.6;font-size:0.82rem;">(comma-separated)</span></label>
       <input type="text" class="blog-tags" placeholder="machine learning, python" value="${(data.tags||[]).join(', ')}" />
-      <label>Link</label>
-      <input type="url" class="blog-link" placeholder="https://medium.com/..." value="${data.link||''}" />
     `;
     document.getElementById('blog-list').appendChild(div);
     checkDirty();
@@ -1530,7 +1525,6 @@
       date:    card.querySelector('.blog-date').value,
       summary: card.querySelector('.blog-summary').value.trim(),
       tags:    card.querySelector('.blog-tags').value.split(',').map(t => t.trim()).filter(Boolean),
-      link:    card.querySelector('.blog-link').value.trim(),
     }));
   }
 
@@ -2191,7 +2185,7 @@
 
       // Blog
       await ghWrite('_data/blog.json', {
-        heading: document.getElementById('blog-heading').value.trim(),
+        heading: 'Blog',
         desc:    document.getElementById('blog-desc').value.trim(),
         posts:   getBlogData(),
       });

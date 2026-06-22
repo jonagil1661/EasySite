@@ -1027,7 +1027,7 @@
   <section id="blog">
     <div class="section-inner">
       <p class="section-label">06 — Blog</p>
-      <h2 class="section-title" id="blog-heading-display">Writing</h2>
+      <h2 class="section-title" id="blog-heading-display">Blog</h2>
       <p class="section-subtitle" id="blog-desc-display" style="max-width:600px;margin:0 auto 40px;text-align:center;opacity:0.85;line-height:1.6;"></p>
       <div id="blog-grid"></div>
     </div>
@@ -2050,17 +2050,11 @@
             card.className = 'blog-card';
             const tagsHtml = (post.tags||[]).length
               ? `<div class="blog-card-tags">${post.tags.map(t=>`<span>${t}</span>`).join('')}</div>` : '';
-            const linkHtml = post.link
-              ? `<a class="blog-card-link" href="${post.link}" target="_blank" rel="noopener">Read more →</a>` : '';
-            const inner = `
+            card.innerHTML = `
               <div class="blog-card-date">${post.date || ''}</div>
               <div class="blog-card-title">${post.title}</div>
               <div class="blog-card-summary">${post.summary || ''}</div>
-              ${tagsHtml}
-              ${linkHtml}`;
-            card.innerHTML = post.link
-              ? `<a href="${post.link}" target="_blank" rel="noopener" style="display:contents;">${inner}</a>`
-              : inner;
+              ${tagsHtml}`;
             grid.appendChild(card);
           });
         }
