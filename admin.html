@@ -162,7 +162,7 @@
     }
     .card-header h3 { font-size: 1rem; color: var(--a-text); }
     label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--a-text-muted); margin-bottom: 6px; }
-    input[type="text"], input[type="url"], input[type="date"], textarea, select {
+    input[type="text"], input[type="url"], input[type="date"], input[type="month"], textarea, select {
       width: 100%; padding: 9px 12px; border: 1.5px solid var(--a-input-border); border-radius: 7px;
       font-size: 0.9rem; font-family: inherit; background: var(--a-input-bg); color: var(--a-input-text);
       transition: border-color 0.15s; margin-bottom: 14px;
@@ -1184,7 +1184,7 @@
 
   function getSnapshot() {
     const fields = document.querySelectorAll(
-      '#admin-shell input[type="text"], #admin-shell input[type="url"], #admin-shell input[type="date"], #admin-shell textarea'
+      '#admin-shell input[type="text"], #admin-shell input[type="url"], #admin-shell input[type="date"], #admin-shell input[type="month"], #admin-shell textarea'
     );
     const fieldVals = Array.from(fields).map(f => f.id + '=' + f.value).join('|');
     // Sidebar section order
@@ -1815,11 +1815,29 @@
   }
 
   // ── Education cards ──
+  function toMonthInputValue(value) {
+    if (!value) return '';
+    if (/^\d{4}-\d{2}$/.test(value)) return value;
+    const match = String(value).trim().match(/^([A-Za-z]+)\s+(\d{4})$/);
+    if (!match) return '';
+    const months = {
+      jan: '01', january: '01', feb: '02', february: '02', mar: '03', march: '03',
+      apr: '04', april: '04', may: '05', jun: '06', june: '06', jul: '07', july: '07',
+      aug: '08', august: '08', sep: '09', sept: '09', september: '09',
+      oct: '10', october: '10', nov: '11', november: '11', dec: '12', december: '12',
+    };
+    const month = months[match[1].toLowerCase()];
+    return month ? `${match[2]}-${month}` : '';
+  }
+
   window.addEduCard = (data = {}) => {
     const id = data.id || crypto.randomUUID();
     const div = document.createElement('div');
     div.className = 'card'; div.dataset.id = id;
     const logoSrc = data.logoURL ? rawUrl(data.logoURL) : '';
+    const startValue = toMonthInputValue(data.start);
+    const endValue = toMonthInputValue(data.end);
+    const currentMonth = new Date().toISOString().slice(0, 7);
     div.innerHTML = `
       <div class="card-header">
         <div style="display:flex;align-items:center;gap:10px;">
@@ -1836,8 +1854,8 @@
         <div><label>Degree <span style="color:var(--red);">*</span></label><input type="text" class="edu-degree" value="${data.degree||''}" placeholder="B.S. Computer Science" /></div>
       </div>
       <div class="field-row">
-        <div><label>Start Date <span style="color:var(--red);">*</span></label><input type="text" class="edu-start" value="${data.start||''}" placeholder="Aug 2022" /></div>
-        <div><label>End Date <span style="color:var(--red);">*</span></label><input type="text" class="edu-end" value="${data.end||''}" placeholder="May 2027" /></div>
+        <div><label>Start Date <span style="color:var(--red);">*</span></label><input type="month" class="edu-start" value="${startValue}" max="${currentMonth}" required /></div>
+        <div><label>End Date <span style="color:var(--red);">*</span></label><input type="month" class="edu-end" value="${endValue}" required /></div>
       </div>
       <div class="field-row">
         <div><label>GPA</label><input type="text" class="edu-gpa" value="${data.gpa||''}" placeholder="e.g. 3.8" /></div>
@@ -1845,7 +1863,7 @@
       </div>
       <label>Relevant Coursework (comma-separated)</label>
       <textarea class="edu-coursework" rows="3" placeholder="Data Structures, Machine Learning...">${(data.coursework||[]).join(', ')}</textarea>
-      <label style="margin-top:12px;">School Logo (optional)</label>
+      <label style="margin-top:12px;">School Logo</label>
       <div style="display:flex;align-items:center;gap:14px;margin-top:6px;">
         <img class="logo-preview" src="${logoSrc}" alt="" style="width:56px;height:56px;object-fit:contain;border-radius:8px;border:1px solid var(--border);display:${logoSrc?'block':'none'};" />
         <div>
@@ -1899,7 +1917,6 @@
       <textarea class="proj-desc" rows="3" placeholder="A full-stack web app...">${data.desc||''}</textarea>
       <label>Tech Tags (comma-separated)</label>
       <input type="text" class="proj-tags" value="${(data.tags||[]).join(', ')}" placeholder="Flutter, Firebase, Dart" />
-      <p style="font-size:0.78rem;color:var(--gray);margin-bottom:10px;">All URL fields are optional — leave blank to hide that button.</p>
       <div class="field-row">
         <div><label>GitHub URL</label><input type="url" class="proj-github" value="${data.github||''}" placeholder="https://github.com/..." /></div>
         <div><label>Live / Website URL</label><input type="url" class="proj-live" value="${data.live||''}" placeholder="https://..." /></div>
@@ -1908,7 +1925,7 @@
         <div><label>Devpost URL</label><input type="url" class="proj-devpost" value="${data.devpost||''}" placeholder="https://devpost.com/software/..." /></div>
         <div><label>Demo / YouTube URL</label><input type="url" class="proj-demo" value="${data.demo||''}" placeholder="https://youtube.com/..." /></div>
       </div>
-      <label style="margin-top:8px;">Project Images (carousel, optional)</label>
+      <label style="margin-top:8px;">Project Images</label>
       <div class="img-preview-grid proj-img-grid"></div>
       <button type="button" class="btn-add proj-add-img-btn" style="margin-top:0;">+ Add Image</button>
       <input type="file" class="proj-file-input" accept="image/png,image/jpeg,image/webp" style="display:none;" />
@@ -2628,6 +2645,22 @@
     return null;
   }
 
+  function getEducationMonthError(field) {
+    if (!field?.matches('.edu-start, .edu-end') || !field.value.trim()) return null;
+    if (!isValidMonthValue(field.value)) return field.classList.contains('edu-start')
+      ? 'Enter a valid education start month'
+      : 'Enter a valid education end month';
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    if (field.classList.contains('edu-start') && field.value > currentMonth) return 'Start date cannot be in the future';
+    const card = field.closest('.card');
+    const start = card?.querySelector('.edu-start')?.value;
+    const end = card?.querySelector('.edu-end')?.value;
+    if (field.classList.contains('edu-end') && start && end && isValidMonthValue(start) && isValidMonthValue(end) && end < start) {
+      return 'End date cannot be before start date';
+    }
+    return null;
+  }
+
   function getFieldPanel(field) {
     const panel = field?.closest('.admin-panel');
     return panel?.id?.replace(/^panel-/, '') || null;
@@ -2678,6 +2711,10 @@
     return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
   }
 
+  function isValidMonthValue(value) {
+    return /^\d{4}-(0[1-9]|1[0-2])$/.test(value);
+  }
+
   function validateAllRequiredFields() {
     const invalids = [];
     validateRequiredField(document.getElementById('hero-tagline'), 'Hero tagline is required', invalids);
@@ -2698,6 +2735,28 @@
       ['.edu-start', 'Start date is required'],
       ['.edu-end', 'End date is required'],
     ], invalids);
+    document.querySelectorAll('#edu-list .card').forEach(card => {
+      const startField = card.querySelector('.edu-start');
+      const endField = card.querySelector('.edu-end');
+      [
+        [startField, 'Enter a valid education start month'],
+        [endField, 'Enter a valid education end month'],
+      ].forEach(([field, msg]) => {
+        if (field && field.value.trim()) {
+          const dateError = getEducationMonthError(field);
+          if (dateError) {
+            showError(field, dateError === 'Enter a valid education start month' || dateError === 'Enter a valid education end month' ? msg : dateError);
+            invalids.push(field);
+          } else if (field.classList.contains('field-invalid')) {
+            showError(field, null);
+          }
+        }
+      });
+      if (startField?.value && endField?.value && isValidMonthValue(startField.value) && isValidMonthValue(endField.value) && endField.value < startField.value) {
+        showError(endField, 'End date cannot be before start date');
+        invalids.push(endField);
+      }
+    });
 
     validateCardFields('#proj-list .card', [
       ['.proj-name', 'Project name is required'],
@@ -2790,6 +2849,13 @@
     }
     if (el.type === 'url' || el.dataset.validate === 'email') validateInput(el);
     else if (el.matches('.blog-date, .award-date, .cert-date')) showError(el, getSpecialDateError(el));
+    else if (el.matches('.edu-start, .edu-end')) {
+      showError(el, getEducationMonthError(el));
+      const endField = el.closest('.card')?.querySelector('.edu-end');
+      if (endField && endField !== el && endField.classList.contains('field-invalid')) {
+        showError(endField, getEducationMonthError(endField));
+      }
+    }
     else if (el.value.trim()) showError(el, null);
     clearSectionErrorIfResolved(el);
   }, true);
