@@ -3,10 +3,13 @@
     "institution": "University of Georgia",
     "location": "Athens, GA",
     "degree": "B.S. Computer Science",
-    "start": "Aug 2023",
-    "end": "Aug 2",
-    "gpa": "",
-    "coursework": [],
+    "start": "2023-08",
+    "end": "2026-12",
+    "gpa": "4.0",
+    "coursework": [
+      "CS 1302 Softwar Development",
+      "CS 2720 Data Structures & Algorithms"
+    ],
     "logoURL": null
   }
 ]
