@@ -1,22 +1,22 @@
 {
   "sectionOrder": [
-    "about",
-    "blog"
+    "about"
   ],
   "hiddenSections": [
     "awards",
-    "experience",
-    "education",
-    "projects",
-    "resume",
-    "hobbies",
-    "faq",
-    "cv",
+    "blog",
     "certifications",
-    "research",
-    "notes",
-    "trips",
+    "cv",
+    "education",
+    "experience",
+    "faq",
     "gear",
-    "spotify"
+    "hobbies",
+    "notes",
+    "projects",
+    "research",
+    "resume",
+    "spotify",
+    "trips"
   ]
 }
