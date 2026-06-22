@@ -2274,6 +2274,7 @@
       });
 
       // Layout
+      sortHiddenSections();
       const active = Array.from(document.querySelectorAll('#nav-active [data-section]')).map(a => a.dataset.section);
       const hidden = Array.from(document.querySelectorAll('#nav-hidden [data-section]')).map(a => a.dataset.section);
       await ghWrite('_data/layout.json', { sectionOrder: active, hiddenSections: hidden });
@@ -2346,6 +2347,23 @@
       const link = allLinks.find(l => l.dataset.section === section);
       if (link) hiddenEl.appendChild(link);
     });
+    sortHiddenSections();
+  }
+
+  function getNavLabel(link) {
+    return Array.from(link.childNodes)
+      .filter(node => node.nodeType === Node.TEXT_NODE)
+      .map(node => node.textContent.trim())
+      .join(' ')
+      .trim()
+      .toLowerCase();
+  }
+
+  function sortHiddenSections() {
+    const hiddenEl = document.getElementById('nav-hidden');
+    Array.from(hiddenEl.querySelectorAll('[data-section]'))
+      .sort((a, b) => getNavLabel(a).localeCompare(getNavLabel(b)))
+      .forEach(link => hiddenEl.appendChild(link));
   }
 
   const navSortableOpts = {
@@ -2353,7 +2371,7 @@
     handle: '.nav-drag-handle',
     animation: 150,
     ghostClass: 'sortable-ghost',
-    onEnd: checkDirty,
+    onEnd: () => { sortHiddenSections(); checkDirty(); },
   };
   Sortable.create(document.getElementById('nav-active'), navSortableOpts);
   Sortable.create(document.getElementById('nav-hidden'), navSortableOpts);
