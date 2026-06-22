@@ -1397,7 +1397,22 @@
       return isLight() ? 'rgba(0,30,80,' : 'rgba(255,255,255,';
     }
 
-    let W, H, raf, mode = 'particles';
+    function getCurrentTimePeriod() {
+      const h = new Date().getHours();
+      if (h >= 5  && h < 8)  return 'dawn';
+      if (h >= 8  && h < 17) return 'day';
+      if (h >= 17 && h < 20) return 'sunset';
+      return 'midnight';
+    }
+
+    function getInitialBgMode() {
+      const theme = localStorage.getItem('portfolio-theme') || 'auto';
+      if (theme !== 'time') return 'particles';
+      const period = document.documentElement.getAttribute('data-period') || getCurrentTimePeriod();
+      return period === 'midnight' ? 'shooting-stars' : period === 'day' ? 'clouds' : 'none';
+    }
+
+    let W, H, raf, mode = getInitialBgMode();
     let particles = [], scrollVel = 0, lastScrollY = window.scrollY;
     let mouse = { x: -9999, y: -9999 };
     let ripples = [], rippleTimer = 0;
@@ -1789,7 +1804,11 @@
       setMode: function(m) {
         mode = m;
         cancelAnimationFrame(raf);
-        if (m === 'none') { canvas.style.display = 'none'; return; }
+        if (m === 'none') {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          canvas.style.display = 'none';
+          return;
+        }
         canvas.style.display = '';
         resize();
         if (m === 'ripples')             initRipples();
@@ -1807,7 +1826,17 @@
     window.addEventListener('mousemove', function(e) { mouse.x = e.clientX; mouse.y = e.clientY; });
     window.addEventListener('mouseleave', function() { mouse.x = -9999; mouse.y = -9999; });
 
-    resize(); initParticles(); tick();
+    resize();
+    if (mode === 'none') {
+      canvas.style.display = 'none';
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    } else {
+      if (mode === 'ripples')             initRipples();
+      else if (mode === 'shooting-stars') initStars();
+      else if (mode === 'clouds')         initClouds();
+      else                                initParticles();
+      tick();
+    }
   })();
   </script>
   <script>
