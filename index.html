@@ -1676,6 +1676,7 @@
     function drawScenery() {
       const p = document.documentElement.getAttribute('data-period');
       if (!p) return;
+      if (p === 'sunset' || p === 'dawn') return;
       _sunAngle += 0.002;
 
       // Moon during midnight
@@ -1852,10 +1853,8 @@
         const sRes = await fetch('_data/settings.json?t=' + Date.now());
         if (sRes.ok) {
           const s = await sRes.json();
-          if (s.effectType && window._bgEffect) {
-            const _period = document.documentElement.getAttribute('data-period');
-            // Day mode always uses clouds; don't override with settings effectType
-            if (_period !== 'day') window._bgEffect.setMode(s.effectType);
+          if (s.effectType && window._bgEffect && document.documentElement.getAttribute('data-theme') !== 'time') {
+            window._bgEffect.setMode(s.effectType);
           }
         }
       } catch(e) {}
