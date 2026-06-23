@@ -1492,7 +1492,7 @@
         r: rand(0.4, 1.6),
         phase: rand(0, Math.PI * 2),
         speed: rand(0.015, 0.045),
-        gold: Math.random() < 0.08,
+        gold: false,
       }));
       shootingStars = [];
       starTimer = 0;
@@ -1506,7 +1506,7 @@
         vx: Math.cos(angle) * spd, vy: Math.sin(angle) * spd,
         tailLen: rand(70, 220), alpha: rand(0.7, 1.0),
         fade: rand(0.008, 0.016),
-        gold: Math.random() < 0.12,
+        gold: false,
       };
     }
 
