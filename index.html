@@ -1003,7 +1003,7 @@
     <div class="section-inner">
       <p class="section-label">05 — FAQs</p>
       <h2 class="section-title" id="faq-heading-display">FAQs</h2>
-      <p class="section-subtitle" id="faq-desc-display" style="max-width:600px;margin:0 auto 40px;text-align:center;opacity:0.85;line-height:1.6;"></p>
+      <p class="section-subtitle" id="faq-desc-display" style="max-width:600px;margin:0 auto 40px;text-align:center;opacity:0.85;line-height:1.6;">Want to know more about me? Here are some FAQs!</p>
       <div id="faq-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;"></div>
     </div>
   </section>
@@ -2042,9 +2042,7 @@
       try {
         const res = await fetch('_data/faq.json?t=' + Date.now());
         if (!res.ok) return;
-        const { heading = '', desc = '', items = [] } = await res.json();
-        if (heading) document.getElementById('faq-heading-display').textContent = heading;
-        if (desc)    document.getElementById('faq-desc-display').textContent = desc;
+        const { items = [] } = await res.json();
         const grid = document.getElementById('faq-grid');
         items.forEach(item => {
           const card = document.createElement('div');

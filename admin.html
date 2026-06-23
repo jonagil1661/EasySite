@@ -727,12 +727,6 @@
           <h2>FAQs</h2>
           <p>Manage frequently asked questions shown on your website.</p>
         </div>
-        <div class="card">
-          <label>Section heading</label>
-          <input type="text" id="faq-heading" placeholder="FAQs" />
-          <label>Section description</label>
-          <textarea id="faq-desc" rows="3" placeholder="Want to know about me? Here are some questions you might have..."></textarea>
-        </div>
         <div id="faq-list"></div>
         <button class="btn-add" onclick="addFaqCard()">+ Add Question</button>
       </div>
@@ -1410,8 +1404,6 @@
   async function loadFaq() {
     const d = await ghRead('_data/faq.json');
     if (!d) return;
-    document.getElementById('faq-heading').value = d.heading || '';
-    document.getElementById('faq-desc').value    = d.desc    || '';
     (d.items || []).forEach(i => addFaqCard(i));
   }
 
@@ -2350,8 +2342,6 @@
 
       // FAQ
       await ghWrite('_data/faq.json', {
-        heading: document.getElementById('faq-heading').value.trim(),
-        desc:    document.getElementById('faq-desc').value.trim(),
         items:   getFaqData(),
       });
 
