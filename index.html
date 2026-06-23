@@ -1699,6 +1699,8 @@
         ctx.fillStyle = dg; ctx.fill();
         // crescent shadow — offset circle that clips into the disc
         ctx.save();
+        ctx.beginPath(); ctx.arc(mx, my, mr, 0, Math.PI * 2);
+        ctx.clip();
         ctx.globalCompositeOperation = 'destination-out';
         const sx2 = mx + mr * 0.42, sy2 = my - mr * 0.08;
         ctx.beginPath(); ctx.arc(sx2, sy2, mr * 0.82, 0, Math.PI * 2);
