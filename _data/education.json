@@ -44,5 +44,51 @@
     "gpa": "",
     "coursework": [],
     "logoURL": "assets/images/logos/edu-a77035ed-11be-481f-811b-787a6d9ae3b9.jpg"
+  },
+  {
+    "institution": "University of Georgia",
+    "location": "Athens, GA",
+    "degree": "B.S. Computer Science",
+    "start": "2022-08",
+    "end": "2025-05",
+    "gpa": "4.0",
+    "coursework": [
+      "CS 1302 Software Development",
+      "CS 2720 Data Structures & Algorithms"
+    ],
+    "logoURL": null
+  },
+  {
+    "institution": "Georgia Institute of Technology",
+    "location": "Atlanta, GA",
+    "degree": "M.S. Computer Science",
+    "start": "2025-08",
+    "end": "2026-05",
+    "gpa": "",
+    "coursework": [],
+    "logoURL": "assets/images/logos/edu-a77035ed-11be-481f-811b-787a6d9ae3b9.jpg"
+  },
+  {
+    "institution": "University of Georgia",
+    "location": "Athens, GA",
+    "degree": "B.S. Computer Science",
+    "start": "2022-08",
+    "end": "2025-05",
+    "gpa": "4.0",
+    "coursework": [
+      "CS 1302 Software Development",
+      "CS 2720 Data Structures & Algorithms"
+    ],
+    "logoURL": null
+  },
+  {
+    "institution": "Georgia Institute of Technology",
+    "location": "Atlanta, GA",
+    "degree": "M.S. Computer Science",
+    "start": "2025-08",
+    "end": "2026-05",
+    "gpa": "",
+    "coursework": [],
+    "logoURL": "assets/images/logos/edu-a77035ed-11be-481f-811b-787a6d9ae3b9.jpg"
   }
 ]

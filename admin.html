@@ -554,7 +554,7 @@
           <a href="#" data-panel="faq" data-section="faq">
             <span class="nav-drag-handle">⠿</span>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            FAQ
+            FAQs
           </a>
           <a href="#" data-panel="cv" data-section="cv">
             <span class="nav-drag-handle">⠿</span>
@@ -724,14 +724,8 @@
       <!-- FAQ -->
       <div class="admin-panel" id="panel-faq">
         <div class="panel-header">
-          <h2>FAQ</h2>
+          <h2>FAQs</h2>
           <p>Manage frequently asked questions shown on your website.</p>
-        </div>
-        <div class="card">
-          <label>Section heading</label>
-          <input type="text" id="faq-heading" placeholder="Frequently Asked Questions" />
-          <label>Section description</label>
-          <textarea id="faq-desc" rows="3" placeholder="Want to know about me? Here are some questions you might have..."></textarea>
         </div>
         <div id="faq-list"></div>
         <button class="btn-add" onclick="addFaqCard()">+ Add Question</button>
@@ -1410,8 +1404,6 @@
   async function loadFaq() {
     const d = await ghRead('_data/faq.json');
     if (!d) return;
-    document.getElementById('faq-heading').value = d.heading || '';
-    document.getElementById('faq-desc').value    = d.desc    || '';
     (d.items || []).forEach(i => addFaqCard(i));
   }
 
@@ -1425,10 +1417,10 @@
         <h3 class="list-item-title">${data.question || 'New Question'}</h3>
         <button class="btn btn-danger btn-sm" onclick="this.closest('.card').remove()">Remove</button>
       </div>
-      <label>Question</label>
-      <input type="text" class="faq-question" placeholder="What's your MBTI?" value="${(data.question||'').replace(/"/g,'&quot;')}" oninput="this.closest('.card').querySelector('.list-item-title').textContent=this.value||'New Question'" />
-      <label>Answer</label>
-      <textarea class="faq-answer" rows="3" placeholder="Your answer here...">${data.answer||''}</textarea>
+      <label>Question <span style="color:var(--red);">*</span></label>
+      <input type="text" class="faq-question" placeholder="What's your MBTI?" value="${(data.question||'').replace(/"/g,'&quot;')}" required oninput="this.closest('.card').querySelector('.list-item-title').textContent=this.value||'New Question'" />
+      <label>Answer <span style="color:var(--red);">*</span></label>
+      <textarea class="faq-answer" rows="3" placeholder="Your answer here..." required>${data.answer||''}</textarea>
     `;
     document.getElementById('faq-list').appendChild(div);
     checkDirty();
@@ -2350,8 +2342,6 @@
 
       // FAQ
       await ghWrite('_data/faq.json', {
-        heading: document.getElementById('faq-heading').value.trim(),
-        desc:    document.getElementById('faq-desc').value.trim(),
         items:   getFaqData(),
       });
 
@@ -2867,6 +2857,10 @@
     validateCardFields('#hobbies-list .card', [['.hobby-label', 'Hobby label is required']], invalids);
     validateCardFields('#trips-list .card', [['.trip-label', 'Trip label is required']], invalids);
     validateCardFields('#gear-list .card', [['.gear-name', 'Gear item name is required']], invalids);
+    validateCardFields('#faq-list .card', [
+      ['.faq-question', 'FAQ question is required'],
+      ['.faq-answer', 'FAQ answer is required'],
+    ], invalids);
     validateCardFields('#notes-list .card', [['.note-title', 'Note title is required']], invalids);
     validateCardFields('#blog-list .card', [
       ['.blog-title', 'Blog post title is required'],
