@@ -1,12 +1,12 @@
 {
   "sectionOrder": [
-    "about"
+    "about",
+    "cv"
   ],
   "hiddenSections": [
     "awards",
     "blog",
     "certifications",
-    "cv",
     "education",
     "experience",
     "faq",
