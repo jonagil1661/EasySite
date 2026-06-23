@@ -1,7 +1,6 @@
 {
   "sectionOrder": [
-    "about",
-    "faq"
+    "about"
   ],
   "hiddenSections": [
     "awards",
@@ -10,6 +9,7 @@
     "cv",
     "education",
     "experience",
+    "faq",
     "gear",
     "hobbies",
     "notes",
