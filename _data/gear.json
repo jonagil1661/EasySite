@@ -1,5 +1,16 @@
 {
-  "heading": "My Setup",
+  "heading": "",
   "desc": "",
-  "items": []
+  "items": [
+    {
+      "name": "Macbook Pro M4 Pro",
+      "desc": "One of my best purchases in college!",
+      "link": ""
+    },
+    {
+      "name": "TUMI - Alpha Bravo Search Backpack",
+      "desc": "",
+      "link": "https://www.tumi.com/p/search-backpack-01424801041/"
+    }
+  ]
 }

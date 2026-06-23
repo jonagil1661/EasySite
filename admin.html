@@ -755,9 +755,9 @@
         </div>
         <div class="card">
           <label>Section heading</label>
-          <input type="text" id="gear-heading" placeholder="My Setup" />
+          <input type="text" id="gear-heading" placeholder="My Gear" />
           <label style="margin-top:14px;">Section description</label>
-          <textarea id="gear-desc" rows="2" placeholder="The tools I use every day."></textarea>
+          <textarea id="gear-desc" rows="2" placeholder="The things I use every day."></textarea>
         </div>
         <div id="gear-list"></div>
         <button class="btn-add" onclick="addGearCard()">+ Add Item</button>
@@ -1483,14 +1483,9 @@
       </div>
       <label>Name <span style="color:var(--red);">*</span></label>
       <input type="text" class="gear-name" placeholder="MacBook Pro M3" value="${(data.name||'').replace(/"/g,'&quot;')}" oninput="this.closest('.card').querySelector('.list-item-title').textContent=this.value||'New Item'" />
-      <label>Category</label>
-      <input type="text" class="gear-category" placeholder="Hardware" value="${(data.category||'').replace(/"/g,'&quot;')}" list="gear-categories" />
-      <datalist id="gear-categories">
-        <option value="Hardware"/><option value="Peripherals"/><option value="Audio"/><option value="Software"/><option value="Desk"/><option value="Other"/>
-      </datalist>
       <label>Description</label>
       <textarea class="gear-desc-field" rows="2" placeholder="Brief description...">${data.desc||''}</textarea>
-      <label>Link <span style="font-weight:400;opacity:0.6;font-size:0.82rem;">(optional)</span></label>
+      <label>Link</label>
       <input type="url" class="gear-link" placeholder="https://..." value="${data.link||''}" />
     `;
     document.getElementById('gear-list').appendChild(div);
@@ -1500,7 +1495,6 @@
   function getGearData() {
     return Array.from(document.querySelectorAll('#gear-list .card')).map(card => ({
       name:     card.querySelector('.gear-name').value.trim(),
-      category: card.querySelector('.gear-category').value.trim(),
       desc:     card.querySelector('.gear-desc-field').value.trim(),
       link:     card.querySelector('.gear-link').value.trim(),
     }));
