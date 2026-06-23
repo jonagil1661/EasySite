@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "company": "Google",
+    "role": "Software Engineer Intern",
+    "start": "2025-05",
+    "end": "2025-08",
+    "bullets": [
+      "Built a cool app",
+      "Worked on backend for Gemini"
+    ],
+    "logoURL": null
+  }
+]
