@@ -9,5 +9,15 @@
       "Worked on backend for Gemini"
     ],
     "logoURL": null
+  },
+  {
+    "company": "Georgia Tech",
+    "role": "Undergraduate Teaching Assistant",
+    "start": "2026-01",
+    "end": "Current",
+    "bullets": [
+      "Teaching Assistant for CS 4641/7641, Machine Learning"
+    ],
+    "logoURL": null
   }
 ]
