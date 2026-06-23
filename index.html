@@ -1083,7 +1083,7 @@
   <section id="cv">
     <div class="section-inner">
       <p class="section-label">— CV</p>
-      <h2 class="section-title">Curriculum Vitae</h2>
+      <h2 class="section-title">CV</h2>
       <div class="resume-layout">
         <div class="resume-pdf-col">
           <div class="resume-pdf-wrap" id="cv-pdf-wrap">
@@ -1341,15 +1341,18 @@
 
   <script>
     (function() {
-      const wrap = document.querySelector('.resume-pdf-wrap');
-      const iframe = wrap.querySelector('iframe');
       const TOOLBAR_H = 56; // Chrome PDF viewer toolbar height in px
-      function sizeIframe() {
-        const w = wrap.offsetWidth;
-        iframe.style.height = (w * (11 / 8.5) + TOOLBAR_H) + 'px';
+      function sizePdfIframes() {
+        document.querySelectorAll('.resume-pdf-wrap').forEach(wrap => {
+          const iframe = wrap.querySelector('iframe');
+          if (!iframe) return;
+          const w = wrap.offsetWidth;
+          iframe.style.height = (w * (11 / 8.5) + TOOLBAR_H) + 'px';
+        });
       }
-      sizeIframe();
-      window.addEventListener('resize', sizeIframe);
+      window.sizePdfIframes = sizePdfIframes;
+      sizePdfIframes();
+      window.addEventListener('resize', sizePdfIframes);
     })();
   </script>
 
@@ -1980,7 +1983,10 @@
           const { url } = await cvRes.json();
           if (url) {
             const wrap = document.getElementById('cv-pdf-wrap');
-            if (wrap) wrap.innerHTML = `<iframe src="${url}#view=FitH" title="CV"></iframe>`;
+              if (wrap) {
+                wrap.innerHTML = `<iframe src="${url}#view=FitH" title="CV"></iframe>`;
+                if (window.sizePdfIframes) window.sizePdfIframes();
+              }
           }
         }
       } catch(e) {}
