@@ -1,5 +1,14 @@
 {
   "heading": "Frequently Asked Questions",
-  "desc": "",
-  "items": []
+  "desc": "Want to know more about me? Here are some FAQs!",
+  "items": [
+    {
+      "question": "What's your MBTI?",
+      "answer": "I don't know, I've never taken the test before."
+    },
+    {
+      "question": "How many languages can you speak?",
+      "answer": "3! Korean, English, & German."
+    }
+  ]
 }
