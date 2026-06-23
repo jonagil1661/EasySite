@@ -1425,10 +1425,10 @@
         <h3 class="list-item-title">${data.question || 'New Question'}</h3>
         <button class="btn btn-danger btn-sm" onclick="this.closest('.card').remove()">Remove</button>
       </div>
-      <label>Question</label>
-      <input type="text" class="faq-question" placeholder="What's your MBTI?" value="${(data.question||'').replace(/"/g,'&quot;')}" oninput="this.closest('.card').querySelector('.list-item-title').textContent=this.value||'New Question'" />
-      <label>Answer</label>
-      <textarea class="faq-answer" rows="3" placeholder="Your answer here...">${data.answer||''}</textarea>
+      <label>Question <span style="color:var(--red);">*</span></label>
+      <input type="text" class="faq-question" placeholder="What's your MBTI?" value="${(data.question||'').replace(/"/g,'&quot;')}" required oninput="this.closest('.card').querySelector('.list-item-title').textContent=this.value||'New Question'" />
+      <label>Answer <span style="color:var(--red);">*</span></label>
+      <textarea class="faq-answer" rows="3" placeholder="Your answer here..." required>${data.answer||''}</textarea>
     `;
     document.getElementById('faq-list').appendChild(div);
     checkDirty();
@@ -2867,6 +2867,10 @@
     validateCardFields('#hobbies-list .card', [['.hobby-label', 'Hobby label is required']], invalids);
     validateCardFields('#trips-list .card', [['.trip-label', 'Trip label is required']], invalids);
     validateCardFields('#gear-list .card', [['.gear-name', 'Gear item name is required']], invalids);
+    validateCardFields('#faq-list .card', [
+      ['.faq-question', 'FAQ question is required'],
+      ['.faq-answer', 'FAQ answer is required'],
+    ], invalids);
     validateCardFields('#notes-list .card', [['.note-title', 'Note title is required']], invalids);
     validateCardFields('#blog-list .card', [
       ['.blog-title', 'Blog post title is required'],
