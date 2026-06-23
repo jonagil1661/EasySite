@@ -764,13 +764,9 @@
       transition: background 0.18s, transform 0.18s;
     }
     .gear-card:hover { background: var(--glass-bg); transform: translateY(-2px); }
-    .gear-card-category { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(179,163,105,0.8); }
     .gear-card-name { font-size: 1rem; font-weight: 700; color: var(--glass-text); }
     .gear-card-desc { font-size: 0.85rem; line-height: 1.6; opacity: 0.75; flex: 1; }
     .gear-card-link { font-size: 0.8rem; color: rgba(179,163,105,0.9); font-weight: 600; margin-top: 4px; }
-    .gear-section-label { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.45; margin: 28px 0 12px; }
-    .gear-section-label:first-child { margin-top: 0; }
-
     /* Spotify */
     #spotify-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 14px; }
     .spotify-card {
@@ -2285,26 +2281,14 @@
           if (heading) document.getElementById('gear-heading-display').textContent = heading;
           if (desc)    document.getElementById('gear-desc-display').textContent = desc;
           const grid = document.getElementById('gear-grid');
-          // Group by category
-          const cats = {};
-          items.forEach(item => { const c = item.category||'Other'; (cats[c]=cats[c]||[]).push(item); });
-          Object.entries(cats).forEach(([cat, catItems]) => {
-            const label = document.createElement('div');
-            label.className = 'gear-section-label'; label.textContent = cat;
-            grid.appendChild(label);
-            const row = document.createElement('div');
-            row.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:8px;';
-            catItems.forEach(item => {
-              const card = document.createElement('div');
-              card.className = 'gear-card';
-              card.innerHTML = `
-                <div class="gear-card-category">${item.category||''}</div>
-                <div class="gear-card-name">${item.name}</div>
-                ${item.desc ? `<div class="gear-card-desc">${item.desc}</div>` : ''}
-                ${item.link ? `<a class="gear-card-link" href="${item.link}" target="_blank" rel="noopener">View →</a>` : ''}`;
-              row.appendChild(card);
-            });
-            grid.appendChild(row);
+          items.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'gear-card';
+            card.innerHTML = `
+              <div class="gear-card-name">${item.name}</div>
+              ${item.desc ? `<div class="gear-card-desc">${item.desc}</div>` : ''}
+              ${item.link ? `<a class="gear-card-link" href="${item.link}" target="_blank" rel="noopener">View →</a>` : ''}`;
+            grid.appendChild(card);
           });
         }
       } catch(e) {}
