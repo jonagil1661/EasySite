@@ -2025,7 +2025,9 @@
           const list = document.getElementById('experience-list');
           items.forEach(e => {
             const bullets = (e.bullets || []).map(b => `<li>${b}</li>`).join('');
-            const date = [e.start, e.end === 'Current' ? 'Present' : e.end].filter(Boolean).join(' – ');
+            const start = formatMonthYear(e.start);
+            const end = e.end === 'Current' ? 'Present' : formatMonthYear(e.end);
+            const date = [start, end].filter(Boolean).join(' – ');
             list.insertAdjacentHTML('beforeend', `
               <div class="exp-card">
                 <div class="exp-header">
