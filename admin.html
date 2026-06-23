@@ -1800,6 +1800,9 @@
     const div = document.createElement('div');
     div.className = 'card'; div.dataset.id = id;
     const logoSrc = data.logoURL ? rawUrl(data.logoURL) : '';
+    const startValue = toMonthInputValue(data.start);
+    const endValue = data.end === 'Current' ? '' : toMonthInputValue(data.end);
+    const currentMonth = new Date().toISOString().slice(0, 7);
     div.innerHTML = `
       <div class="card-header">
         <div style="display:flex;align-items:center;gap:10px;">
@@ -1813,12 +1816,12 @@
         <div><label>Role <span style="color:var(--red);">*</span></label><input type="text" class="exp-role" value="${data.role||''}" placeholder="Software Engineer Intern" /></div>
       </div>
       <div class="field-row">
-        <div><label>Start Date <span style="color:var(--red);">*</span></label><input type="text" class="exp-start" value="${data.start||''}" placeholder="May 2025" /></div>
-        <div><label>End Date <span style="font-size:0.75rem;font-weight:400;color:var(--gray);">(blank = "Current")</span></label><input type="text" class="exp-end" value="${data.end === 'Current' ? '' : (data.end||'')}" placeholder="Aug 2025" /></div>
+        <div><label>Start Date <span style="color:var(--red);">*</span></label><input type="month" class="exp-start" value="${startValue}" max="${currentMonth}" required /></div>
+        <div><label>End Date <span style="font-size:0.75rem;font-weight:400;color:var(--gray);">(blank = "Current")</span></label><input type="month" class="exp-end" value="${endValue}" /></div>
       </div>
       <label>Bullets (one per line)</label>
       <textarea class="exp-bullets" rows="4" placeholder="Built a feature that...">${(data.bullets||[]).join('\n')}</textarea>
-      <label style="margin-top:12px;">Company Logo (optional)</label>
+      <label style="margin-top:12px;">Company Logo</label>
       <div style="display:flex;align-items:center;gap:14px;margin-top:6px;">
         <img class="logo-preview" src="${logoSrc}" alt="" style="width:56px;height:56px;object-fit:contain;border-radius:8px;border:1px solid var(--border);display:${logoSrc?'block':'none'};" />
         <div>
@@ -2726,6 +2729,22 @@
     return null;
   }
 
+  function getExperienceMonthError(field) {
+    if (!field?.matches('.exp-start, .exp-end') || !field.value.trim()) return null;
+    if (!isValidMonthValue(field.value)) return field.classList.contains('exp-start')
+      ? 'Enter a valid experience start month'
+      : 'Enter a valid experience end month';
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    if (field.classList.contains('exp-start') && field.value > currentMonth) return 'Start date cannot be in the future';
+    const card = field.closest('.card');
+    const start = card?.querySelector('.exp-start')?.value;
+    const end = card?.querySelector('.exp-end')?.value;
+    if (field.classList.contains('exp-end') && start && end && isValidMonthValue(start) && isValidMonthValue(end) && end < start) {
+      return 'End date cannot be before start date';
+    }
+    return null;
+  }
+
   function getFieldPanel(field) {
     const panel = field?.closest('.admin-panel');
     return panel?.id?.replace(/^panel-/, '') || null;
@@ -2792,6 +2811,22 @@
       ['.exp-role', 'Role is required'],
       ['.exp-start', 'Start date is required'],
     ], invalids);
+    document.querySelectorAll('#exp-list .card').forEach(card => {
+      [
+        card.querySelector('.exp-start'),
+        card.querySelector('.exp-end'),
+      ].forEach(field => {
+        if (field && field.value.trim()) {
+          const dateError = getExperienceMonthError(field);
+          if (dateError) {
+            showError(field, dateError);
+            invalids.push(field);
+          } else if (field.classList.contains('field-invalid')) {
+            showError(field, null);
+          }
+        }
+      });
+    });
 
     validateCardFields('#edu-list .card', [
       ['.edu-institution', 'Institution is required'],
@@ -2914,6 +2949,13 @@
     }
     if (el.type === 'url' || el.dataset.validate === 'email') validateInput(el);
     else if (el.matches('.blog-date, .award-date, .cert-date')) showError(el, getSpecialDateError(el));
+    else if (el.matches('.exp-start, .exp-end')) {
+      showError(el, getExperienceMonthError(el));
+      const endField = el.closest('.card')?.querySelector('.exp-end');
+      if (endField && endField !== el && endField.classList.contains('field-invalid')) {
+        showError(endField, getExperienceMonthError(endField));
+      }
+    }
     else if (el.matches('.edu-start, .edu-end')) {
       showError(el, getEducationMonthError(el));
       const endField = el.closest('.card')?.querySelector('.edu-end');
