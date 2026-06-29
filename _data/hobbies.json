@@ -1,1 +1,20 @@
-[]
+[
+  {
+    "id": "11718c8b-6069-4338-aa43-7c83f132383c",
+    "label": "Pickleball",
+    "emoji": "",
+    "desc": "I love playing pickleball with friends!",
+    "images": []
+  },
+  {
+    "id": "d222d7db-dbfb-4845-8d92-1145c8e492b7",
+    "label": "Photography",
+    "emoji": "📸",
+    "desc": "In my free time, I like taking pictures of beautiful scenery.",
+    "images": [
+      {
+        "url": "assets/images/hobbies/d222d7db-dbfb-4845-8d92-1145c8e492b7/0.jpg"
+      }
+    ]
+  }
+]
