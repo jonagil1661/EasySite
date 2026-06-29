@@ -1086,16 +1086,34 @@
     );
   }
 
+  function decodeBase64Utf8(base64) {
+    const binary = atob(base64.replace(/\n/g, ''));
+    const bytes = Uint8Array.from(binary, ch => ch.charCodeAt(0));
+    if (window.TextDecoder) return new TextDecoder('utf-8').decode(bytes);
+    return decodeURIComponent(escape(binary));
+  }
+
+  function encodeTextUtf8Base64(text) {
+    if (!window.TextEncoder) return btoa(unescape(encodeURIComponent(text)));
+    const bytes = new TextEncoder().encode(text);
+    let binary = '';
+    const chunkSize = 0x8000;
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+      binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+    }
+    return btoa(binary);
+  }
+
   async function ghRead(path) {
     const res = await _ghFetch(path);
     if (!res.ok) return null;
     const j = await res.json();
-    try { return JSON.parse(atob(j.content.replace(/\n/g, ''))); }
+    try { return JSON.parse(decodeBase64Utf8(j.content)); }
     catch { return null; }
   }
 
   async function ghWrite(path, content) {
-    queueSaveFile(path, JSON.stringify(content, null, 2) + '\n');
+    queueSaveFile(path, encodeTextUtf8Base64(JSON.stringify(content, null, 2) + '\n'), 'base64');
   }
 
   async function ghWriteBase64(path, base64) {
