@@ -548,7 +548,7 @@
           </a>
           <a href="#" data-panel="hobbies" data-section="hobbies">
             <span class="nav-drag-handle">⠿</span>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a5 5 0 0 1 5 5c0 5-5 11-5 11S7 12 7 7a5 5 0 0 1 5-5z"/><circle cx="12" cy="7" r="2"/></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="9" cy="8" rx="5" ry="6" transform="rotate(-35 9 8)"/><path d="M12.5 12.5 21 21"/><path d="M6 5.5l5.5 5.5M9 3.8l5.2 5.2M4.8 8.5l5.2 5.2"/><circle cx="18" cy="5" r="2"/></svg>
             Hobbies
           </a>
           <a href="#" data-panel="faq" data-section="faq">
@@ -1525,7 +1525,7 @@
       </div>
       <label>Short Description</label>
       <input type="text" class="trip-desc" value="${data.desc||''}" placeholder="Two weeks exploring the Alps!" style="margin-bottom:16px;" />
-      <label>Images (carousel)</label>
+      <label>Images</label>
       <div class="img-preview-grid"></div>
       <button type="button" class="btn-add trip-add-img-btn" style="margin-top:0;">+ Add Image</button>
       <input type="file" class="trip-file-input" accept="image/png,image/jpeg,image/webp" style="display:none;" />
@@ -2002,12 +2002,12 @@
         <button class="btn btn-danger btn-sm" onclick="this.closest('.card').remove()">Remove</button>
       </div>
       <div class="field-row">
-        <div><label>Label <span style="color:var(--red);">*</span></label><input type="text" class="hobby-label" value="${data.label||''}" placeholder="Traveling" oninput="this.closest('.card').querySelector('h3').textContent=this.value||'New Hobby'" /></div>
-        <div><label>Emoji</label><input type="text" class="hobby-emoji" value="${data.emoji||''}" placeholder="✈️" /></div>
+        <div><label>Label <span style="color:var(--red);">*</span></label><input type="text" class="hobby-label" value="${data.label||''}" placeholder="Badminton" oninput="this.closest('.card').querySelector('h3').textContent=this.value||'New Hobby'" /></div>
+        <div><label>Emoji</label><input type="text" class="hobby-emoji" value="${data.emoji||''}" placeholder="🏸" /></div>
       </div>
       <label>Short Description</label>
-      <input type="text" class="hobby-desc" value="${data.desc||''}" placeholder="I love exploring new countries!" style="margin-bottom:16px;" />
-      <label>Images (carousel)</label>
+      <input type="text" class="hobby-desc" value="${data.desc||''}" placeholder="I love playing badminton with my friends!" style="margin-bottom:16px;" />
+      <label>Images</label>
       <div class="img-preview-grid hobby-img-grid"></div>
       <button type="button" class="btn-add hobby-add-img-btn" style="margin-top:0;">+ Add Image</button>
       <input type="file" class="hobby-file-input" accept="image/png,image/jpeg,image/webp" style="display:none;" />
